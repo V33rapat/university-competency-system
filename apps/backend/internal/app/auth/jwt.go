@@ -7,9 +7,9 @@ import (
 )
 
 type Claims struct {
-	UserID    int64  `json:"user_id"`
-	Role      string `json:"role"`
-	FacultyID *int64 `json:"faculty_id,omitempty"`
+	UserID    int64    `json:"user_id"`
+	Roles     []string `json:"roles"`
+	FacultyID *int64   `json:"faculty_id,omitempty"`
 
 	jwt.RegisteredClaims
 }
@@ -20,11 +20,11 @@ type JWTManager struct {
 	ExpireMinutes int
 }
 
-func (m JWTManager) Generate(userID int64, role string, facultyID *int64) (string, error) {
+func (m JWTManager) Generate(userID int64, roles []string, facultyID *int64) (string, error) {
 	now := time.Now()
 	claims := Claims{
 		UserID:    userID,
-		Role:      role,
+		Roles:     roles,
 		FacultyID: facultyID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    m.Issuer,

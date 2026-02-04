@@ -20,7 +20,16 @@ func RequireRoles(roles ...string) func(http.Handler) http.Handler {
 				response.Error(w, http.StatusUnauthorized, "AUTH_MISSING", "missing auth context")
 				return
 			}
-			if !allowed[claims.Role] {
+
+			has := false
+			for _, rr := range claims.Roles {
+				if allowed[rr] {
+					has = true
+					break
+				}
+			}
+
+			if !has {
 				response.Error(w, http.StatusForbidden, "FORBIDDEN", "insufficient role")
 				return
 			}

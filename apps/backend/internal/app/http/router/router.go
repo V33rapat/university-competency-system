@@ -10,48 +10,61 @@ import (
 	"github.com/spw32767/university-competency-system-backend/internal/app/config"
 	"github.com/spw32767/university-competency-system-backend/internal/app/http/handler"
 	"github.com/spw32767/university-competency-system-backend/internal/app/http/middleware"
+	authmod "github.com/spw32767/university-competency-system-backend/internal/module/auth"
 )
 
 func New(db *sql.DB, cfg config.Config) http.Handler {
 	r := chi.NewRouter()
 
-	// middlewares
+	// Global middlewares
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.CORS)
 
-	// health
+	// Health
 	r.Get("/health", handler.Health)
 
+	// JWT Manager
 	jwtMgr := auth.JWTManager{
 		Secret:        []byte(cfg.JWTSecret),
 		Issuer:        cfg.JWTIssuer,
 		ExpireMinutes: cfg.JWTExpireMinutes,
 	}
 
+	// Auth middleware (cookie first, bearer fallback)
 	authMW := middleware.AuthMiddleware{JWT: jwtMgr}
-	authHandler := handler.AuthHandler{JWT: jwtMgr}
 
+	// Auth module wiring (DB real)
+	authRepo := authmod.NewRepository(db)
+	authSvc := authmod.NewService(authRepo)
+	authHandler := &authmod.Handler{
+		Service: authSvc,
+		JWT:     jwtMgr,
+	}
+
+	// Versioned API routes
 	r.Route("/api/v1", func(api chi.Router) {
-		// public
+		// --- Public ---
 		api.Post("/auth/login", authHandler.Login)
 
-		// protected example
+		// --- Protected ---
 		api.Group(func(pr chi.Router) {
 			pr.Use(authMW.Required)
 
-			// admin-only example endpoint
+			// Who am I (for role-based UI)
+			pr.Get("/auth/me", authHandler.Me)
+			pr.Post("/auth/logout", authHandler.Logout)
+
+			// Examples (optional)
 			pr.With(middleware.RequireRoles("admin")).Get("/admin/ping", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("admin pong"))
 			})
 
-			// officer/admin example
 			pr.With(middleware.RequireRoles("admin", "officer")).Get("/officer/ping", func(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte("officer pong"))
 			})
 		})
 	})
 
-	_ = db // ยังไม่ได้ใช้ใน base นี้
 	return r
 }

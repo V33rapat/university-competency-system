@@ -29,11 +29,14 @@ const CompetencyRadarChart = ({
 }) => {
     const chartRef = useRef(null);
     const [chartLabelRadius, setChartLabelRadius] = useState(165);
+    const [dpr, setDpr] = useState(1);
 
     // Dynamic radius for chart labels based on screen size
     useEffect(() => {
         const calculateRadius = () => {
             const width = window.innerWidth;
+            setDpr(window.devicePixelRatio || 1);
+
             if (width <= 768) {
                 setChartLabelRadius(150); // Mobile
             } else if (width <= 1024) {
@@ -70,6 +73,7 @@ const CompetencyRadarChart = ({
 
     const radarOptions = {
         onClick: handleChartClick,
+        devicePixelRatio: dpr,
         onHover: (event, chartElement) => {
             if (event.native) {
                 event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
@@ -178,7 +182,7 @@ const CompetencyRadarChart = ({
                     {renderChartLabels()}
                 </div>
                 <div className="chart-canvas">
-                    <Radar ref={chartRef} data={chartData} options={radarOptions} />
+                    <Radar key={dpr} ref={chartRef} data={chartData} options={radarOptions} />
                 </div>
             </div>
 

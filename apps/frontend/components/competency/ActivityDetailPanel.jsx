@@ -32,7 +32,7 @@ const ActivityDetailPanel = ({
                         {Icon && <Icon size={20} />}
                     </div>
                     <span>{comp?.name}</span>
-                    <span className="score-badge">{totalEarned} คะแนน</span>
+                    <span className="score-badge">{formatNumber(totalEarned, 2)} คะแนน</span>
                 </h2>
                 <button className="close-btn" onClick={() => { setActiveCompetency(null); setActiveDetailYear(null); }}>
                     <X size={18} />
@@ -67,12 +67,12 @@ const ActivityDetailPanel = ({
                                     borderLeftColor: comp?.color
                                 }}
                             >
-                                <div className="act-badge">{act.type.charAt(0)}</div>
+                                <div className="act-badge">{(act.type || 'A').charAt(0)}</div>
                                 <div className="act-info">
                                     <span className="act-title">{act.title}</span>
-                                    <span className="act-date">{act.date}</span>
+                                    <span className="act-date">{act.date || '-'}</span>
                                 </div>
-                                <div className="act-score earned">+{act.score}</div>
+                                <div className="act-score earned">+{formatNumber(act.score, 2)}</div>
                             </div>
                         ))}
                         {completedActivities.length === 0 && (
@@ -82,12 +82,12 @@ const ActivityDetailPanel = ({
                 </div>
 
                 {/* Available Activities - only show for current year (2567 mockup) */}
-                {(displayYear === '2567') && (
+                {activities.some(act => act.status === 'available' && act.year === displayYear) && (
                     <div className="detail-activities available-section">
                         <h4>กิจกรรมที่สามารถทำเพื่อรับคะแนนได้</h4>
                         <div className="activity-cards">
                             {activities
-                                .filter(act => act.status === 'available' && act.year === '2567')
+                                .filter(act => act.status === 'available' && act.year === displayYear)
                                 .map(act => (
                                     <div
                                         key={act.id}
@@ -96,12 +96,12 @@ const ActivityDetailPanel = ({
                                             borderLeftColor: comp?.color
                                         }}
                                     >
-                                        <div className="act-badge available">{act.type.charAt(0)}</div>
+                                        <div className="act-badge available">{(act.type || 'A').charAt(0)}</div>
                                         <div className="act-info">
                                             <span className="act-title">{act.title}</span>
-                                            <span className="act-date">{act.date}</span>
+                                            <span className="act-date">{act.date || '-'}</span>
                                         </div>
-                                        <div className="act-score potential">+{act.score}</div>
+                                        <div className="act-score potential">+{formatNumber(act.score, 2)}</div>
                                     </div>
                                 ))}
                         </div>
@@ -113,3 +113,9 @@ const ActivityDetailPanel = ({
 };
 
 export default ActivityDetailPanel;
+
+function formatNumber(value, decimals) {
+    if (Number.isNaN(value)) return '0';
+    const factor = 10 ** decimals;
+    return (Math.round((value + Number.EPSILON) * factor) / factor).toFixed(decimals);
+}

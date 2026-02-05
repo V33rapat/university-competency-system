@@ -43,6 +43,12 @@ func New(db *sql.DB, cfg config.Config) http.Handler {
 		JWT:     jwtMgr,
 	}
 
+	competencyRepo := repositories.NewCompetencyRepository(db)
+	competencySvc := services.NewCompetencyService(competencyRepo)
+	competencyHandler := &controllers.CompetencyController{
+		Service: competencySvc,
+	}
+
 	// Versioned API routes
 	r.Route("/api/v1", func(api chi.Router) {
 		// --- Public ---
@@ -55,6 +61,8 @@ func New(db *sql.DB, cfg config.Config) http.Handler {
 			// Who am I (for role-based UI)
 			pr.Get("/auth/me", authHandler.Me)
 			pr.Post("/auth/logout", authHandler.Logout)
+
+			pr.Get("/competency/dashboard", competencyHandler.Dashboard)
 
 			// Examples (optional)
 			pr.With(middleware.RequireRoles("admin")).Get("/admin/ping", func(w http.ResponseWriter, r *http.Request) {

@@ -18,7 +18,7 @@ const GapAnalysis = ({
             <div className="gap-grid">
                 {competencies.map(id => {
                     const score = scores[id.id] || 0;
-                    const target = requirements[id.id];
+                    const target = requirements[id.id] || 0;
                     const gap = score - target;
                     const Icon = id.icon;
 
@@ -30,21 +30,21 @@ const GapAnalysis = ({
                                 </div>
                                 <span className="gap-name">{id.name}</span>
                                 <span className={`gap-value ${gap >= 0 ? 'positive' : 'negative'}`}>
-                                    {gap >= 0 ? '+' : ''}{gap}
+                                    {gap >= 0 ? '+' : ''}{formatNumber(gap, 2)}
                                 </span>
                             </div>
                             <div className="gap-bar">
                                 <div
                                     className="gap-fill"
                                     style={{
-                                        width: `${Math.min(100, (score / target) * 100)}%`,
+                                        width: `${target > 0 ? Math.min(100, (score / target) * 100) : 0}%`,
                                         backgroundColor: gap >= 0 ? '#10b981' : '#f97316'
                                     }}
                                 ></div>
                             </div>
                             <div className="gap-labels">
-                                <span>คะแนน: {score}</span>
-                                <span>เป้าหมาย: {target}</span>
+                                <span>คะแนน: {formatNumber(score, 2)}</span>
+                                <span>เป้าหมาย: {formatNumber(target, 2)}</span>
                             </div>
                         </div>
                     );
@@ -55,3 +55,9 @@ const GapAnalysis = ({
 };
 
 export default GapAnalysis;
+
+function formatNumber(value, decimals) {
+    if (Number.isNaN(value)) return '0';
+    const factor = 10 ** decimals;
+    return (Math.round((value + Number.EPSILON) * factor) / factor).toFixed(decimals);
+}

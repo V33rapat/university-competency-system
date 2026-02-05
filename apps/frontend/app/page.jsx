@@ -1,16 +1,23 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Award, Activity } from 'lucide-react';
+import {
+    Award,
+    Activity,
+    Brain,
+    Monitor,
+    Crown,
+    Scale,
+    MessageCircle,
+    Users
+} from 'lucide-react';
 import Link from 'next/link';
 
 // Config & Data
 import { CHART_COLORS } from '../config/theme';
-import {
-    COMPETENCIES, YEARS, MONTHS, CURRICULUM_REQUIREMENTS, ACTIVITIES_BY_COMPETENCY,
-    getScoresByYear, getScoresByDateRange
-} from '../data/competencyData';
+import { MONTHS } from '../data/competencyData';
+import { fetchCompetencyDashboard } from '../lib/competency';
 
 // Components
 import CompetencyLayout from '../components/competency/CompetencyLayout';
@@ -30,16 +37,20 @@ export default function CompetencyPage() {
     const [activePage, setActivePage] = useState('dashboard');
 
     // Dashboard States
-    const [selectedCompetencies, setSelectedCompetencies] = useState(
-        COMPETENCIES.slice(0, 6).map(c => c.id)
-    );
+    const [selectedCompetencies, setSelectedCompetencies] = useState([]);
+    const [competencies, setCompetencies] = useState([]);
+    const [requirements, setRequirements] = useState({});
+    const [activitiesByCompetency, setActivitiesByCompetency] = useState({});
+    const [availableYears, setAvailableYears] = useState([]);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [dataError, setDataError] = useState(null);
 
     // Filter Mode: 'year' | 'range'
     const [filterMode, setFilterMode] = useState('year');
-    const [selectedYears, setSelectedYears] = useState(['2567']);
+    const [selectedYears, setSelectedYears] = useState([]);
     const [dateRange, setDateRange] = useState({
-        startYear: '2567', startMonth: 1,
-        endYear: '2567', endMonth: 3
+        startYear: '', startMonth: 1,
+        endYear: '', endMonth: 1
     });
 
     const [showRequirement, setShowRequirement] = useState(false);
@@ -76,6 +87,53 @@ export default function CompetencyPage() {
         }
     }, [loading, user, router]);
 
+    useEffect(() => {
+        const loadDashboard = async () => {
+            if (!user) return;
+            setDataLoading(true);
+            setDataError(null);
+            try {
+                const response = await fetchCompetencyDashboard();
+                const payload = response?.data || response;
+                const styledCompetencies = (payload.competencies || []).map((comp) => ({
+                    id: comp.id,
+                    code: comp.code,
+                    name: comp.name_th || comp.name_en || comp.code,
+                    icon: getCompetencyIcon(comp.code),
+                    color: getCompetencyColor(comp.code),
+                }));
+                const activityMap = {};
+                Object.entries(payload.activities || {}).forEach(([key, value]) => {
+                    activityMap[Number(key)] = value || [];
+                });
+                const years = normalizeYears(payload.available_years || [], activityMap);
+
+                setCompetencies(styledCompetencies);
+                setRequirements(payload.requirements || {});
+                setActivitiesByCompetency(activityMap);
+                setAvailableYears(years);
+
+                if (styledCompetencies.length) {
+                    setSelectedCompetencies(styledCompetencies.slice(0, 6).map((c) => c.id));
+                }
+                if (years.length) {
+                    setSelectedYears([years[0]]);
+                    setDateRange((prev) => ({
+                        ...prev,
+                        startYear: years[0],
+                        endYear: years[0],
+                    }));
+                }
+            } catch (error) {
+                setDataError(error?.message || 'โหลดข้อมูลไม่สำเร็จ');
+            } finally {
+                setDataLoading(false);
+            }
+        };
+
+        loadDashboard();
+    }, [user]);
+
     const handleLogout = async () => {
         await logout();
         router.push('/login');
@@ -105,23 +163,22 @@ export default function CompetencyPage() {
     // Get Data Helper
     const getScoresForCurrentFilter = () => {
         if (filterMode === 'year') {
-            return getScoresByYear(selectedYears[0]);
-        } else {
-            const { startYear, startMonth, endYear, endMonth } = dateRange;
-            return getScoresByDateRange(startYear, startMonth, endYear, endMonth);
+            return getScoresByYear(selectedYears[0], activitiesByCompetency);
         }
+        const { startYear, startMonth, endYear, endMonth } = dateRange;
+        return getScoresByDateRange(startYear, startMonth, endYear, endMonth, activitiesByCompetency);
     };
 
     // Chart Data Preparation
     const getChartData = () => {
         const labels = selectedCompetencies.map(id =>
-            COMPETENCIES.find(c => c.id === id)?.name || id
+            competencies.find(c => c.id === id)?.name || id
         );
         const datasets = [];
 
         if (filterMode === 'year') {
             selectedYears.forEach((year, index) => {
-                const yearData = getScoresByYear(year);
+                const yearData = getScoresByYear(year, activitiesByCompetency);
                 const data = selectedCompetencies.map(id => yearData[id] || 0);
 
                 datasets.push({
@@ -140,7 +197,7 @@ export default function CompetencyPage() {
             });
         } else {
             const { startYear, startMonth, endYear, endMonth } = dateRange;
-            const periodData = getScoresByDateRange(startYear, startMonth, endYear, endMonth);
+            const periodData = getScoresByDateRange(startYear, startMonth, endYear, endMonth, activitiesByCompetency);
             const data = selectedCompetencies.map(id => periodData[id] || 0);
 
             // Create label
@@ -171,7 +228,7 @@ export default function CompetencyPage() {
         }
 
         if (showRequirement) {
-            const reqData = selectedCompetencies.map(id => CURRICULUM_REQUIREMENTS[id] || 0);
+            const reqData = selectedCompetencies.map(id => requirements[id] || 0);
             datasets.push({
                 label: 'เกณฑ์หลักสูตร',
                 data: reqData,
@@ -208,29 +265,46 @@ export default function CompetencyPage() {
     const getStats = () => {
         const data = getScoresForCurrentFilter();
         const values = Object.values(data);
-        const avg = values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1) : 0;
+        const avgValue = values.length > 0 ? (values.reduce((a, b) => a + b, 0) / values.length) : 0;
+        const avg = formatNumber(avgValue, 1);
 
         let growth = 0;
         if (filterMode === 'year' && selectedYears.length >= 2) {
             const sorted = [...selectedYears].sort().reverse();
-            const latest = getScoresByYear(sorted[0]);
-            const prev = getScoresByYear(sorted[1]);
-            const latestAvg = Object.values(latest).reduce((a, b) => a + b, 0) / 8;
-            const prevAvg = Object.values(prev).reduce((a, b) => a + b, 0) / 8;
+            const latest = getScoresByYear(sorted[0], activitiesByCompetency);
+            const prev = getScoresByYear(sorted[1], activitiesByCompetency);
+            const divisor = selectedCompetencies.length || 1;
+            const latestAvg = Object.values(latest).reduce((a, b) => a + b, 0) / divisor;
+            const prevAvg = Object.values(prev).reduce((a, b) => a + b, 0) / divisor;
             growth = prevAvg > 0 ? (((latestAvg - prevAvg) / prevAvg) * 100).toFixed(0) : 0;
         }
 
         const passed = selectedCompetencies.filter(id => {
             const score = data[id] || 0;
-            const req = CURRICULUM_REQUIREMENTS[id];
+            const req = requirements[id] || 0;
             return score >= req;
         }).length;
 
         return { avg, growth, passed, total: selectedCompetencies.length };
     };
 
+    const scoresForFilters = useMemo(
+        () => getScoresForCurrentFilter(),
+        [filterMode, selectedYears, dateRange, activitiesByCompetency]
+    );
+
     return (
         <CompetencyLayout activePage={activePage} onNavigate={setActivePage}>
+            {dataLoading && (
+                <div className="card" style={{ margin: '1.5rem' }}>
+                    กำลังโหลดข้อมูลสมรรถนะ...
+                </div>
+            )}
+            {!dataLoading && dataError && (
+                <div className="card" style={{ margin: '1.5rem', color: '#b91c1c' }}>
+                    {dataError}
+                </div>
+            )}
             <div
                 style={{
                     display: 'flex',
@@ -279,7 +353,7 @@ export default function CompetencyPage() {
                         {/* Chart Section */}
                         <CompetencyRadarChart
                             chartData={getChartData()}
-                            competencies={COMPETENCIES}
+                            competencies={competencies}
                             selectedCompetencies={selectedCompetencies}
                             activeCompetency={activeCompetency}
                             onCompetencyClick={handleChartPointClick}
@@ -292,12 +366,12 @@ export default function CompetencyPage() {
 
                         {/* Filter Section */}
                         <CompetencyFilters
-                            allCompetencies={COMPETENCIES}
+                            allCompetencies={competencies}
                             selectedCompetencies={selectedCompetencies}
                             onToggleCompetency={toggleCompetency}
                             filterMode={filterMode}
                             setFilterMode={setFilterMode}
-                            years={YEARS}
+                            years={availableYears}
                             months={MONTHS}
                             selectedYears={selectedYears}
                             onToggleYear={toggleYear}
@@ -314,8 +388,8 @@ export default function CompetencyPage() {
                         activeDetailYear={activeDetailYear}
                         setActiveCompetency={setActiveCompetency}
                         setActiveDetailYear={setActiveDetailYear}
-                        competencies={COMPETENCIES}
-                        activitiesByCompetency={ACTIVITIES_BY_COMPETENCY}
+                        competencies={competencies}
+                        activitiesByCompetency={activitiesByCompetency}
                         filterMode={filterMode}
                         selectedYears={selectedYears}
                         dateRange={dateRange}
@@ -326,9 +400,9 @@ export default function CompetencyPage() {
 
                     {/* Gap Analysis */}
                     <GapAnalysis
-                        competencies={selectedCompetencies.map(id => COMPETENCIES.find(c => c.id === id)).filter(Boolean)}
-                        scores={getScoresForCurrentFilter()}
-                        requirements={CURRICULUM_REQUIREMENTS}
+                        competencies={competencies.filter((comp) => selectedCompetencies.includes(comp.id))}
+                        scores={scoresForFilters}
+                        requirements={requirements}
                     />
                 </>
             )}
@@ -353,9 +427,9 @@ export default function CompetencyPage() {
                                 </h2>
                             </div>
                             <div className="activity-list">
-                                {Object.values(ACTIVITIES_BY_COMPETENCY).flat().slice(0, 5).map(act => (
+                                {Object.values(activitiesByCompetency).flat().slice(0, 5).map(act => (
                                     <div key={act.id} className="activity-item">
-                                        <div className="activity-badge">{act.type.charAt(0)}</div>
+                                        <div className="activity-badge">{(act.type || 'A').charAt(0)}</div>
                                         <div className="activity-info">
                                             <h4>{act.title}</h4>
                                             <span>{act.date}</span>
@@ -392,21 +466,21 @@ export default function CompetencyPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Object.entries(ACTIVITIES_BY_COMPETENCY).flatMap(([compId, acts]) =>
+                                {Object.entries(activitiesByCompetency).flatMap(([compId, acts]) =>
                                     acts.map(act => {
-                                        const comp = COMPETENCIES.find(c => c.id === compId);
-                                        const Icon = comp.icon;
+                                        const comp = competencies.find(c => c.id === Number(compId));
+                                        const Icon = comp?.icon;
                                         return (
                                             <tr key={act.id}>
                                                 <td>{act.title}</td>
                                                 <td>{act.date}</td>
                                                 <td>
-                                                    <span className="comp-badge" style={{ backgroundColor: `${comp.color}15`, color: comp.color }}>
-                                                        <Icon size={14} />
-                                                        <span>{comp.name}</span>
+                                                    <span className="comp-badge" style={{ backgroundColor: `${comp?.color || '#64748b'}15`, color: comp?.color || '#64748b' }}>
+                                                        {Icon && <Icon size={14} />}
+                                                        <span>{comp?.name || 'สมรรถนะ'}</span>
                                                     </span>
                                                 </td>
-                                                <td><strong>+{act.score}</strong></td>
+                                                <td><strong>+{formatNumber(act.score, 2)}</strong></td>
                                                 <td>
                                                     <span className="status-badge verified">
                                                         ✓ ยืนยันแล้ว
@@ -424,4 +498,85 @@ export default function CompetencyPage() {
 
         </CompetencyLayout>
     );
+}
+
+function normalizeYears(apiYears, activityMap) {
+    const yearSet = new Set(apiYears);
+    Object.values(activityMap).forEach((activities) => {
+        activities.forEach((activity) => {
+            if (activity.year) {
+                yearSet.add(activity.year);
+            }
+        });
+    });
+    if (!yearSet.size) {
+        const now = new Date();
+        const beYear = now.getFullYear() + 543 + (now.getMonth() >= 5 ? 1 : 0);
+        return [String(beYear)];
+    }
+    return Array.from(yearSet).sort((a, b) => Number(b) - Number(a));
+}
+
+function getScoresByYear(year, activityMap) {
+    const scores = {};
+    Object.keys(activityMap).forEach((compId) => {
+        const activities = activityMap[compId] || [];
+        const completed = activities.filter((activity) => activity.status === 'completed' && activity.year === year);
+        const total = completed.reduce((sum, activity) => sum + (activity.score || 0), 0);
+        scores[compId] = roundNumber(total, 2);
+    });
+    return scores;
+}
+
+function getScoresByDateRange(startYear, startMonth, endYear, endMonth, activityMap) {
+    const scores = {};
+    const startValue = Number(startYear) * 100 + Number(startMonth);
+    const endValue = Number(endYear) * 100 + Number(endMonth);
+
+    Object.keys(activityMap).forEach((compId) => {
+        const activities = activityMap[compId] || [];
+        const completed = activities.filter((activity) => {
+            if (activity.status !== 'completed') return false;
+            if (!activity.year || !activity.month) return false;
+            const value = Number(activity.year) * 100 + Number(activity.month);
+            return value >= startValue && value <= endValue;
+        });
+        const total = completed.reduce((sum, activity) => sum + (activity.score || 0), 0);
+        scores[compId] = roundNumber(total, 2);
+    });
+    return scores;
+}
+
+function getCompetencyIcon(code) {
+    const mapping = {
+        tst_comm: MessageCircle,
+        tst_ct: Brain,
+        tst_team: Users,
+        tst_lead: Crown,
+        tst_ethic: Scale,
+        tst_digi: Monitor,
+    };
+    return mapping[code] || Activity;
+}
+
+function getCompetencyColor(code) {
+    const mapping = {
+        tst_comm: '#ec4899',
+        tst_ct: '#3b82f6',
+        tst_team: '#06b6d4',
+        tst_lead: '#f59e0b',
+        tst_ethic: '#10b981',
+        tst_digi: '#8b5cf6',
+    };
+    return mapping[code] || '#64748b';
+}
+
+function roundNumber(value, decimals) {
+    const factor = 10 ** decimals;
+    return Math.round((value + Number.EPSILON) * factor) / factor;
+}
+
+function formatNumber(value, decimals) {
+    if (Number.isNaN(value)) return '0';
+    return roundNumber(value, decimals).toFixed(decimals);
 }

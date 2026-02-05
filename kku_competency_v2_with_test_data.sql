@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Feb 04, 2026 at 06:28 PM
+-- Generation Time: Feb 05, 2026 at 06:14 PM
 -- Server version: 10.11.11-MariaDB-0+deb12u1-log
 -- PHP Version: 8.4.16
 
@@ -46,6 +46,14 @@ CREATE TABLE `act_activities` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Faculty-level activities (parent entity)';
 
+--
+-- Dumping data for table `act_activities`
+--
+
+INSERT INTO `act_activities` (`activity_id`, `faculty_id`, `code`, `name_th`, `name_en`, `description`, `category`, `type`, `created_by`, `status`, `visibility_scope`, `registration_required`, `published_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'TST-AI-WS', 'อบรมเชิงปฏิบัติการ AI', 'AI Workshop', 'กิจกรรมทดสอบ: เวิร์กช็อป AI', 'academic', 'workshop', 3, 'published', 'faculty_only', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 'TST-VOL-01', 'อาสาพัฒนาชุมชน', 'Community Volunteer', 'กิจกรรมทดสอบ: จิตอาสา', 'volunteer', 'field', 3, 'published', 'faculty_only', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -69,6 +77,13 @@ CREATE TABLE `act_faculty_policies` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Default session settings per faculty to reduce repeated data entry';
+
+--
+-- Dumping data for table `act_faculty_policies`
+--
+
+INSERT INTO `act_faculty_policies` (`faculty_policy_id`, `faculty_id`, `default_timezone`, `default_registration_required`, `default_grading_mode`, `default_max_raw_score`, `default_pass_threshold`, `default_late_grace_minutes`, `default_late_penalty_factor`, `default_require_checkout`, `default_min_attendance_minutes`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Asia/Bangkok', 1, 'hybrid', 100.00, 60.00, 15, 0.9000, 1, 150, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -105,6 +120,14 @@ CREATE TABLE `act_sessions` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Actual scheduled sessions of activities';
 
+--
+-- Dumping data for table `act_sessions`
+--
+
+INSERT INTO `act_sessions` (`session_id`, `activity_id`, `session_no`, `start_at`, `end_at`, `timezone`, `location_name`, `location_detail`, `latitude`, `longitude`, `capacity`, `registration_required`, `grading_mode`, `max_raw_score`, `pass_threshold`, `late_grace_minutes`, `late_penalty_factor`, `require_checkout`, `min_attendance_minutes`, `status`, `is_finalized`, `finalized_at`, `finalized_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, '2026-02-10 09:00:00', '2026-02-10 12:00:00', 'Asia/Bangkok', 'อาคารเรียนรวม', 'ห้อง 1401', 16.4740000, 102.8230000, 50, 1, 'hybrid', 100.00, 60.00, 15, 0.9000, 1, 150, 'completed', 1, '2026-02-10 12:30:00', 2, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 1, '2026-02-15 08:30:00', '2026-02-15 16:30:00', 'Asia/Bangkok', 'ศูนย์ชุมชน', 'พื้นที่กิจกรรมกลางแจ้ง', 16.4700000, 102.8200000, 80, 1, 'attendance_only', 100.00, 0.00, 10, 1.0000, 1, 360, 'completed', 1, '2026-02-15 17:00:00', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -126,6 +149,15 @@ CREATE TABLE `act_session_assignments` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Assign lecturers/officers to a session and define their permissions';
 
+--
+-- Dumping data for table `act_session_assignments`
+--
+
+INSERT INTO `act_session_assignments` (`session_assignment_id`, `session_id`, `user_id`, `assignment_role`, `can_record_attendance`, `can_grade`, `can_finalize`, `note`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 2, 'lecturer', 0, 1, 1, 'ผู้สอน/ผู้ประเมิน', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 3, 'officer', 1, 0, 0, 'เจ้าหน้าที่บันทึกเวลา', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 2, 3, 'supervisor', 1, 0, 1, 'หัวหน้ากิจกรรม/ปิดงาน', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -141,6 +173,17 @@ CREATE TABLE `act_session_competencies` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Defines which competencies a session awards and the max percent for each';
+
+--
+-- Dumping data for table `act_session_competencies`
+--
+
+INSERT INTO `act_session_competencies` (`session_competency_id`, `session_id`, `competency_id`, `max_percent`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 30.00, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 40.00, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 1, 3, 30.00, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 2, 5, 50.00, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 2, 3, 50.00, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -165,6 +208,17 @@ CREATE TABLE `act_session_registrations` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Student registrations per session (supports required registration and walk-in)';
 
+--
+-- Dumping data for table `act_session_registrations`
+--
+
+INSERT INTO `act_session_registrations` (`session_registration_id`, `session_id`, `person_id`, `status`, `registered_at`, `approved_by`, `approved_at`, `cancel_reason`, `note`, `source`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'approved', '2026-02-05 18:11:50', 3, '2026-02-05 18:11:50', NULL, 'ลงทะเบียนและอนุมัติ', 'student', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 'approved', '2026-02-05 18:11:50', 3, '2026-02-05 18:11:50', NULL, 'ลงทะเบียนและอนุมัติ', 'student', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 1, 3, 'pending', '2026-02-05 18:11:50', NULL, NULL, NULL, 'รออนุมัติ', 'student', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 2, 1, 'approved', '2026-02-05 18:11:50', 3, '2026-02-05 18:11:50', NULL, 'อาสา', 'student', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 2, 2, 'approved', '2026-02-05 18:11:50', 3, '2026-02-05 18:11:50', NULL, 'อาสา', 'student', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -186,6 +240,17 @@ CREATE TABLE `att_session_attendances` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Attendance per student per session, including optional check-in/out';
+
+--
+-- Dumping data for table `att_session_attendances`
+--
+
+INSERT INTO `att_session_attendances` (`session_attendance_id`, `session_id`, `person_id`, `status`, `checkin_at`, `checkout_at`, `checkin_method`, `checkout_method`, `notes`, `recorded_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'present', '2026-02-10 09:02:00', '2026-02-10 12:01:00', 'qr', 'qr', 'มาตรงเวลา', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 'late', '2026-02-10 09:20:00', '2026-02-10 12:00:00', 'qr', 'qr', 'มาสาย', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 1, 3, 'absent', NULL, NULL, NULL, NULL, 'ไม่มา', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 2, 1, 'present', '2026-02-15 08:35:00', '2026-02-15 16:35:00', 'qr', 'qr', 'เข้าร่วมครบ', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 2, 2, 'present', '2026-02-15 08:40:00', '2026-02-15 16:20:00', 'qr', 'qr', 'เข้าร่วมครบ', 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -209,11 +274,11 @@ CREATE TABLE `auth_roles` (
 --
 
 INSERT INTO `auth_roles` (`role_id`, `code`, `name_th`, `name_en`, `description`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'admin', 'ผู้ดูแลระบบ', 'Admin', 'System administrator', '2026-01-26 13:33:04', '2026-01-26 13:33:04', NULL),
-(2, 'student', 'นักศึกษา', 'Student', 'Learner / student user', '2026-01-26 13:33:04', '2026-01-26 13:33:04', NULL),
-(3, 'lecturer', 'อาจารย์', 'Lecturer', 'Lecturer / assessor', '2026-01-26 13:33:04', '2026-01-26 13:33:04', NULL),
-(4, 'officer', 'เจ้าหน้าที่พัฒนานักศึกษา', 'Student Development Officer', 'Faculty officer who manages activities', '2026-01-26 13:33:04', '2026-01-26 13:33:04', NULL),
-(5, 'dean', 'คณบดี', 'Dean', 'Faculty dean view/report', '2026-01-26 13:33:04', '2026-01-26 13:33:04', NULL);
+(1, 'learner', 'นักศึกษา', 'Student', 'Learner / student user', '2026-01-26 13:33:04', '2026-02-05 03:00:37', NULL),
+(2, 'lecturer', 'อาจารย์', 'Lecturer', 'Lecturer / assessor', '2026-01-26 13:33:04', '2026-02-05 03:00:41', NULL),
+(3, 'officer', 'เจ้าหน้าที่พัฒนานักศึกษา', 'Student Development Officer', 'Faculty officer who manages activities', '2026-01-26 13:33:04', '2026-02-05 03:00:44', NULL),
+(4, 'dean', 'คณบดี', 'Dean', 'Faculty dean view/report', '2026-01-26 13:33:04', '2026-02-05 03:00:46', NULL),
+(5, 'admin', 'ผู้ดูแลระบบ', 'Admin', 'System administrator', '2026-01-26 13:33:04', '2026-02-05 03:00:47', NULL);
 
 -- --------------------------------------------------------
 
@@ -238,6 +303,17 @@ CREATE TABLE `auth_users` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='System users for authentication and auditing';
 
+--
+-- Dumping data for table `auth_users`
+--
+
+INSERT INTO `auth_users` (`user_id`, `username`, `email`, `password_hash`, `auth_provider`, `display_name`, `user_type`, `faculty_id`, `person_id`, `is_active`, `last_login_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'learner01', 'learner@dev.local', '$2b$12$5rwKoXDzsWW4BN1ujsGRzO5dLCpJ7k8tZi2OvBECY1zu83Cw8NzQq', 'local', 'Dev Learner', 'student', 1, NULL, 1, NULL, '2026-02-05 02:36:00', '2026-02-05 03:01:32', NULL),
+(2, 'lecturer01', 'lecturer@dev.local', '$2b$12$maIvSL3inQHbq0O/5m6PRe4vdVcIXmqRt0yY3PxRC8A.zLs4td/1C', 'local', 'Dev Lecturer', 'staff', 1, NULL, 1, NULL, '2026-02-05 02:36:00', '2026-02-05 03:01:35', NULL),
+(3, 'officer01', 'officer@dev.local', '$2b$12$GLJkNOHitkqPgbfnpkzcuuX08sXf4FcbmyjV7FMWzntyULzWUhjLa', 'local', 'Dev Officer', 'staff', 1, NULL, 1, NULL, '2026-02-05 02:36:00', '2026-02-05 03:01:37', NULL),
+(4, 'dean01', 'dean@dev.local', '$2b$12$KK/FpIralbn6/IKSOm4cb.Ugi/2zxjRKIVTKSMKLOvc1F09F30Ova', 'local', 'Dev Dean', 'staff', 1, NULL, 1, NULL, '2026-02-05 02:36:00', '2026-02-05 03:01:38', NULL),
+(5, 'admin01', 'admin@dev.local', '$2b$12$Aoq.oi5.zXX.SjICdyjBGO6ZkbvT4F4s7b8mXkcZJKTL3Nr91y8Iy', 'local', 'Dev Admin', 'staff', NULL, NULL, 1, NULL, '2026-02-05 02:36:00', '2026-02-05 03:01:28', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -253,6 +329,17 @@ CREATE TABLE `auth_user_roles` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Mapping of users to roles with optional faculty scope';
+
+--
+-- Dumping data for table `auth_user_roles`
+--
+
+INSERT INTO `auth_user_roles` (`user_role_id`, `user_id`, `role_id`, `scope_faculty_id`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, NULL, '2026-02-05 02:59:07', '2026-02-05 03:02:11', NULL),
+(2, 2, 2, NULL, '2026-02-05 02:59:07', '2026-02-05 03:02:12', NULL),
+(3, 3, 3, NULL, '2026-02-05 02:59:07', '2026-02-05 03:02:13', NULL),
+(4, 4, 4, NULL, '2026-02-05 02:59:07', '2026-02-05 03:02:15', NULL),
+(5, 5, 5, NULL, '2026-02-05 02:59:07', '2026-02-05 03:02:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -272,6 +359,18 @@ CREATE TABLE `comp_competencies` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `comp_competencies`
+--
+
+INSERT INTO `comp_competencies` (`competency_id`, `code`, `name_th`, `name_en`, `description`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'tst_comm', 'การสื่อสาร', 'Communication', 'ทักษะการสื่อสารและการนำเสนอ', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 'tst_ct', 'คิดเชิงวิพากษ์', 'Critical Thinking', 'วิเคราะห์ แก้ปัญหา ตัดสินใจ', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 'tst_team', 'ทำงานเป็นทีม', 'Teamwork', 'ทำงานร่วมกับผู้อื่นได้', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 'tst_lead', 'ภาวะผู้นำ', 'Leadership', 'ริเริ่ม นำทีม รับผิดชอบ', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 'tst_ethic', 'คุณธรรมจริยธรรม', 'Ethics', 'จริยธรรมและความรับผิดชอบ', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(6, 'tst_digi', 'ทักษะดิจิทัล', 'Digital Literacy', 'ใช้เครื่องมือดิจิทัลอย่างเหมาะสม', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -289,6 +388,18 @@ CREATE TABLE `comp_curriculum_requirements` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `comp_curriculum_requirements`
+--
+
+INSERT INTO `comp_curriculum_requirements` (`curriculum_requirement_id`, `curriculum_id`, `competency_id`, `target_percent`, `is_required`, `display_order`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 15.00, 1, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 20.00, 1, 2, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 1, 3, 15.00, 1, 3, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 1, 6, 25.00, 1, 4, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 1, 5, 15.00, 1, 5, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(6, 1, 4, 10.00, 0, 6, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -309,6 +420,13 @@ CREATE TABLE `comp_templates` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Named competency templates per faculty (used to initialize new curricula)';
 
+--
+-- Dumping data for table `comp_templates`
+--
+
+INSERT INTO `comp_templates` (`template_id`, `faculty_id`, `code`, `name`, `description`, `version_year_be`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'tst_tpl_2568', 'Template สมรรถนะ (ทดสอบ)', 'Template สำหรับทดสอบระบบ', 2568, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -326,6 +444,18 @@ CREATE TABLE `comp_template_items` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Competency items inside a named template';
+
+--
+-- Dumping data for table `comp_template_items`
+--
+
+INSERT INTO `comp_template_items` (`template_item_id`, `template_id`, `competency_id`, `display_order`, `default_target_percent`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 1, 15.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 2, 20.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 1, 3, 3, 15.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 1, 6, 4, 25.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 1, 5, 5, 15.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(6, 1, 4, 6, 10.00, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -353,6 +483,14 @@ CREATE TABLE `deliv_deliverables` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Deliverables (assignments/exams) defined under an activity';
 
+--
+-- Dumping data for table `deliv_deliverables`
+--
+
+INSERT INTO `deliv_deliverables` (`deliverable_id`, `activity_id`, `name_th`, `name_en`, `deliverable_type`, `description`, `due_at`, `max_raw_score`, `allow_multiple_attempts`, `max_attempts`, `late_grace_minutes`, `late_penalty_factor`, `is_active`, `created_by`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Reflection: AI Workshop', 'AI Workshop Reflection', 'submission', 'ให้นักศึกษาเขียน reflection หลังจบกิจกรรม', '2026-02-12 23:59:00', 20.00, 1, 2, 60, 0.9000, 1, 2, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 'AI Quiz', 'AI Quiz', 'exam', 'แบบทดสอบหลังอบรม', '2026-02-10 12:15:00', 30.00, 1, 1, 0, 1.0000, 1, 2, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -368,6 +506,14 @@ CREATE TABLE `deliv_deliverable_sessions` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Maps an activity deliverable to one or more sessions (supports multi-day activities)';
+
+--
+-- Dumping data for table `deliv_deliverable_sessions`
+--
+
+INSERT INTO `deliv_deliverable_sessions` (`deliverable_session_id`, `deliverable_id`, `session_id`, `require_attendance`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 1, 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -397,6 +543,14 @@ CREATE TABLE `deliv_student_exam_attempts` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Exam attempts per activity deliverable (supports multiple attempts)';
+
+--
+-- Dumping data for table `deliv_student_exam_attempts`
+--
+
+INSERT INTO `deliv_student_exam_attempts` (`exam_attempt_id`, `deliverable_id`, `person_id`, `attempt_no`, `status`, `started_at`, `submitted_at`, `duration_seconds`, `raw_score`, `max_raw_score_snapshot`, `final_score`, `graded_by`, `graded_at`, `grader_notes`, `external_exam_ref`, `is_locked`, `locked_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 2, 1, 1, 'graded', '2026-02-10 12:05:00', '2026-02-10 12:15:00', 600, 24.00, 30.00, 24.00, 2, '2026-02-10 12:20:00', 'ผ่าน', 'TST-EXAM-REF-0001', 1, '2026-02-10 12:21:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 2, 1, 'graded', '2026-02-10 12:05:00', '2026-02-10 12:15:00', 600, 18.00, 30.00, 18.00, 2, '2026-02-10 12:20:00', 'พอใช้', 'TST-EXAM-REF-0002', 1, '2026-02-10 12:21:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -429,6 +583,14 @@ CREATE TABLE `deliv_student_submissions` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Student submissions per activity deliverable (supports multiple attempts)';
 
+--
+-- Dumping data for table `deliv_student_submissions`
+--
+
+INSERT INTO `deliv_student_submissions` (`submission_id`, `deliverable_id`, `person_id`, `attempt_no`, `status`, `submitted_at`, `due_at_snapshot`, `late_minutes`, `submission_text`, `submission_url`, `raw_score`, `penalty_factor_snapshot`, `final_score`, `max_raw_score_snapshot`, `graded_by`, `graded_at`, `grader_notes`, `is_locked`, `locked_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 1, 'graded', '2026-02-11 20:10:00', '2026-02-12 23:59:00', 0, 'ได้เรียนรู้พื้นฐานและการประยุกต์ใช้ AI', NULL, 18.00, 1.0000, 18.00, 20.00, 2, '2026-02-12 10:00:00', 'ทำได้ดี', 1, '2026-02-12 10:05:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 1, 2, 1, 'graded', '2026-02-13 01:10:00', '2026-02-12 23:59:00', 71, 'สรุปความเข้าใจเกี่ยวกับ prompt และ model', NULL, 17.00, 0.9000, 15.30, 20.00, 2, '2026-02-13 10:00:00', 'ช้าเล็กน้อย แต่เนื้อหาดี', 1, '2026-02-13 10:05:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -445,6 +607,13 @@ CREATE TABLE `deliv_student_submission_files` (
   `uploaded_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Datetime when file was uploaded',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Files attached to a student submission (multiple files supported)';
+
+--
+-- Dumping data for table `deliv_student_submission_files`
+--
+
+INSERT INTO `deliv_student_submission_files` (`submission_file_id`, `submission_id`, `storage_key`, `original_filename`, `mime_type`, `file_size_bytes`, `uploaded_at`, `deleted_at`) VALUES
+(1, 1, 'tst/submissions/student1/reflection.txt', 'reflection.txt', 'text/plain', 2048, '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -463,6 +632,13 @@ CREATE TABLE `deliv_templates` (
   `uploaded_at` datetime NOT NULL DEFAULT current_timestamp() COMMENT 'Datetime when template file was uploaded',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Template files for a deliverable (students download these to complete the work)';
+
+--
+-- Dumping data for table `deliv_templates`
+--
+
+INSERT INTO `deliv_templates` (`deliverable_template_id`, `deliverable_id`, `storage_key`, `original_filename`, `mime_type`, `file_size_bytes`, `uploaded_by`, `uploaded_at`, `deleted_at`) VALUES
+(1, 1, 'tst/templates/reflection-guideline.pdf', 'reflection-guideline.pdf', 'application/pdf', 245678, 2, '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -485,6 +661,13 @@ CREATE TABLE `edu_curricula` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `edu_curricula`
+--
+
+INSERT INTO `edu_curricula` (`curriculum_id`, `major_id`, `code`, `name_th`, `name_en`, `effective_year`, `status`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'cp_2568_curriculum', 'หลักสูตรวิทยาการคอมพิวเตอร์_พ.ศ.2568', 'cp_curriculum_2025', 2568, 'active', '2026-02-05', NULL, '2026-02-05 18:00:48', '2026-02-05 18:00:56', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -503,6 +686,13 @@ CREATE TABLE `edu_majors` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `edu_majors`
+--
+
+INSERT INTO `edu_majors` (`major_id`, `department_id`, `code`, `name_th`, `name_en`, `degree_level`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'cp_major', 'วิทยาการคอมพิวเตอร์', 'College of Computing', 'bachelor', 1, '2026-02-05 17:59:12', '2026-02-05 17:59:12', NULL);
 
 -- --------------------------------------------------------
 
@@ -526,6 +716,15 @@ CREATE TABLE `kku_enrollments` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='KKU enrollment status & academic affiliation per person';
 
+--
+-- Dumping data for table `kku_enrollments`
+--
+
+INSERT INTO `kku_enrollments` (`enrollment_id`, `person_id`, `student_code`, `faculty_id`, `major_id`, `entry_year_be`, `enrollment_status`, `is_kku_student`, `started_at`, `ended_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, '653040000-1', 1, 1, 2565, '', 1, '2022-06-01', NULL, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, '653040000-2', 1, 1, 2565, '', 1, '2022-06-01', NULL, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 3, '663040000-3', 1, 1, 2566, '', 1, '2023-06-01', NULL, '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -548,6 +747,15 @@ CREATE TABLE `kku_enrollment_curricula` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Curriculum history per KKU enrollment';
 
+--
+-- Dumping data for table `kku_enrollment_curricula`
+--
+
+INSERT INTO `kku_enrollment_curricula` (`enrollment_curriculum_id`, `enrollment_id`, `curriculum_id`, `start_academic_year_be`, `start_semester`, `end_academic_year_be`, `end_semester`, `is_current`, `change_reason`, `note`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 2565, 1, NULL, NULL, 1, 'initial', 'เข้าหลักสูตรเริ่มต้น', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 1, 2565, 1, NULL, NULL, 1, 'initial', 'เข้าหลักสูตรเริ่มต้น', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 3, 1, 2566, 1, NULL, NULL, 1, 'initial', 'เข้าหลักสูตรเริ่มต้น', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -565,6 +773,13 @@ CREATE TABLE `org_departments` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `org_departments`
+--
+
+INSERT INTO `org_departments` (`department_id`, `faculty_id`, `code`, `name_th`, `name_en`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'cp_department', 'วิทยาการคอมพิวเตอร์', 'College of Computing', 1, '2026-02-05 02:35:44', '2026-02-05 17:59:19', NULL);
 
 -- --------------------------------------------------------
 
@@ -584,6 +799,13 @@ CREATE TABLE `org_faculties` (
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `org_faculties`
+--
+
+INSERT INTO `org_faculties` (`faculty_id`, `university_id`, `code`, `name_th`, `name_en`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'cp_faculty', 'วิทยาการคอมพิวเตอร์', 'College of Computing', 1, '2026-02-05 02:35:20', '2026-02-05 17:59:41', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -600,6 +822,13 @@ CREATE TABLE `org_universities` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `deleted_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `org_universities`
+--
+
+INSERT INTO `org_universities` (`university_id`, `code`, `name_th`, `name_en`, `is_active`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'kku', 'มหาวิทยาลัยขอนแก่น', 'Khon Kaen University', 1, '2026-02-05 02:33:07', '2026-02-05 02:33:07', NULL);
 
 -- --------------------------------------------------------
 
@@ -623,6 +852,15 @@ CREATE TABLE `persons` (
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Person master data (identity)';
 
+--
+-- Dumping data for table `persons`
+--
+
+INSERT INTO `persons` (`person_id`, `national_id`, `passport_no`, `prefix_th`, `first_name_th`, `last_name_th`, `first_name_en`, `last_name_en`, `email`, `phone`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, '1103700000011', NULL, 'นาย', 'สมชาย', 'ใจดี', 'Somchai', 'Jaidee', 'student01@demo.local', '0810000001', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, '1103700000029', NULL, 'นางสาว', 'สมหญิง', 'ตั้งใจ', 'Somying', 'Tangjai', 'student02@demo.local', '0810000002', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, '1103700000037', NULL, 'นาย', 'อนันต์', 'พยายาม', 'Anan', 'Phayayam', 'student03@demo.local', '0810000003', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -641,6 +879,17 @@ CREATE TABLE `score_session_competency_evidences` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Links competency scores to multiple evidence records (submission/exam/external)';
+
+--
+-- Dumping data for table `score_session_competency_evidences`
+--
+
+INSERT INTO `score_session_competency_evidences` (`session_competency_evidence_id`, `score_id`, `evidence_type`, `submission_id`, `exam_attempt_id`, `external_ref`, `note`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'submission', 1, NULL, NULL, 'อ้างอิง reflection', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 'exam', NULL, 1, NULL, 'อ้างอิง AI Quiz', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 4, 'submission', 2, NULL, NULL, 'อ้างอิง reflection (late)', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 5, 'exam', NULL, 2, NULL, 'อ้างอิง AI Quiz', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 7, 'other', NULL, NULL, 'attendance:session2', 'หลักฐานจากการเข้าร่วมกิจกรรม', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -662,6 +911,19 @@ CREATE TABLE `score_session_competency_results` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Stored computed earned percent per score record (snapshotted + lockable)';
+
+--
+-- Dumping data for table `score_session_competency_results`
+--
+
+INSERT INTO `score_session_competency_results` (`session_competency_result_id`, `score_id`, `max_percent_snapshot`, `factor_snapshot`, `earned_percent`, `computed_by`, `computed_at`, `is_locked`, `locked_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 30.00, 1.000000, 25.50, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 40.00, 1.000000, 31.20, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 3, 30.00, 1.000000, 27.60, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 4, 30.00, 1.000000, 21.60, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 5, 40.00, 1.000000, 25.20, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(6, 6, 30.00, 1.000000, 20.25, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(7, 7, 50.00, 1.000000, 50.00, 5, '2026-02-05 18:11:50', 1, '2026-02-05 18:11:50', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 -- --------------------------------------------------------
 
@@ -688,6 +950,19 @@ CREATE TABLE `score_session_competency_scores` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT 'Record last update timestamp',
   `deleted_at` datetime DEFAULT NULL COMMENT 'Soft delete timestamp'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Raw/final score per student per session competency (score is separated per competency)';
+
+--
+-- Dumping data for table `score_session_competency_scores`
+--
+
+INSERT INTO `score_session_competency_scores` (`session_competency_score_id`, `session_competency_id`, `person_id`, `grading_source`, `raw_score`, `max_raw_score_snapshot`, `attendance_status_snapshot`, `penalty_factor_snapshot`, `final_score`, `graded_by`, `graded_at`, `notes`, `is_locked`, `locked_at`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 1, 'hybrid', 85.00, 100.00, 'present', 1.0000, 85.00, 2, '2026-02-10 12:40:00', 'รวมคะแนนกิจกรรม+submission', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(2, 2, 1, 'hybrid', 78.00, 100.00, 'present', 1.0000, 78.00, 2, '2026-02-10 12:40:00', 'รวมคะแนนกิจกรรม+exam', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(3, 3, 1, 'hybrid', 92.00, 100.00, 'present', 1.0000, 92.00, 2, '2026-02-10 12:40:00', 'ทำกิจกรรมกลุ่มดี', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(4, 1, 2, 'hybrid', 80.00, 100.00, 'late', 0.9000, 72.00, 2, '2026-02-10 12:40:00', 'มาสาย - คิด penalty', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(5, 2, 2, 'hybrid', 70.00, 100.00, 'late', 0.9000, 63.00, 2, '2026-02-10 12:40:00', 'คะแนนรวม + penalty', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(6, 3, 2, 'hybrid', 75.00, 100.00, 'late', 0.9000, 67.50, 2, '2026-02-10 12:40:00', 'ทำงานกลุ่มพอใช้', 1, '2026-02-10 12:41:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL),
+(7, 4, 1, 'attendance', 100.00, 100.00, 'present', 1.0000, 100.00, 3, '2026-02-15 17:05:00', 'attendance only', 1, '2026-02-15 17:06:00', '2026-02-05 18:11:50', '2026-02-05 18:11:50', NULL);
 
 --
 -- Indexes for dumped tables
@@ -1004,187 +1279,187 @@ ALTER TABLE `score_session_competency_scores`
 -- AUTO_INCREMENT for table `act_activities`
 --
 ALTER TABLE `act_activities`
-  MODIFY `activity_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of activity';
+  MODIFY `activity_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of activity', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `act_faculty_policies`
 --
 ALTER TABLE `act_faculty_policies`
-  MODIFY `faculty_policy_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of faculty activity policy';
+  MODIFY `faculty_policy_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of faculty activity policy', AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `act_sessions`
 --
 ALTER TABLE `act_sessions`
-  MODIFY `session_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of activity session';
+  MODIFY `session_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of activity session', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `act_session_assignments`
 --
 ALTER TABLE `act_session_assignments`
-  MODIFY `session_assignment_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session assignment';
+  MODIFY `session_assignment_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session assignment', AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `act_session_competencies`
 --
 ALTER TABLE `act_session_competencies`
-  MODIFY `session_competency_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session-competency mapping';
+  MODIFY `session_competency_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session-competency mapping', AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `act_session_registrations`
 --
 ALTER TABLE `act_session_registrations`
-  MODIFY `session_registration_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session registration';
+  MODIFY `session_registration_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session registration', AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `att_session_attendances`
 --
 ALTER TABLE `att_session_attendances`
-  MODIFY `session_attendance_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session attendance';
+  MODIFY `session_attendance_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of session attendance', AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `auth_roles`
 --
 ALTER TABLE `auth_roles`
-  MODIFY `role_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of role', AUTO_INCREMENT=6;
+  MODIFY `role_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of role', AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT for table `auth_users`
 --
 ALTER TABLE `auth_users`
-  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of user';
+  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of user', AUTO_INCREMENT=52324;
 
 --
 -- AUTO_INCREMENT for table `auth_user_roles`
 --
 ALTER TABLE `auth_user_roles`
-  MODIFY `user_role_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of user-role mapping';
+  MODIFY `user_role_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of user-role mapping', AUTO_INCREMENT=557;
 
 --
 -- AUTO_INCREMENT for table `comp_competencies`
 --
 ALTER TABLE `comp_competencies`
-  MODIFY `competency_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `competency_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `comp_curriculum_requirements`
 --
 ALTER TABLE `comp_curriculum_requirements`
-  MODIFY `curriculum_requirement_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `curriculum_requirement_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `comp_templates`
 --
 ALTER TABLE `comp_templates`
-  MODIFY `template_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of competency template';
+  MODIFY `template_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of competency template', AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `comp_template_items`
 --
 ALTER TABLE `comp_template_items`
-  MODIFY `template_item_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of competency template item';
+  MODIFY `template_item_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of competency template item', AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `deliv_deliverables`
 --
 ALTER TABLE `deliv_deliverables`
-  MODIFY `deliverable_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable (assignment/exam) under an activity';
+  MODIFY `deliverable_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable (assignment/exam) under an activity', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deliv_deliverable_sessions`
 --
 ALTER TABLE `deliv_deliverable_sessions`
-  MODIFY `deliverable_session_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable-to-session mapping';
+  MODIFY `deliverable_session_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable-to-session mapping', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deliv_student_exam_attempts`
 --
 ALTER TABLE `deliv_student_exam_attempts`
-  MODIFY `exam_attempt_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of exam attempt record';
+  MODIFY `exam_attempt_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of exam attempt record', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deliv_student_submissions`
 --
 ALTER TABLE `deliv_student_submissions`
-  MODIFY `submission_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of student submission';
+  MODIFY `submission_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of student submission', AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deliv_student_submission_files`
 --
 ALTER TABLE `deliv_student_submission_files`
-  MODIFY `submission_file_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of submission file record';
+  MODIFY `submission_file_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of submission file record', AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `deliv_templates`
 --
 ALTER TABLE `deliv_templates`
-  MODIFY `deliverable_template_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable template file';
+  MODIFY `deliverable_template_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of deliverable template file', AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `edu_curricula`
 --
 ALTER TABLE `edu_curricula`
-  MODIFY `curriculum_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `curriculum_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `edu_majors`
 --
 ALTER TABLE `edu_majors`
-  MODIFY `major_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `major_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `kku_enrollments`
 --
 ALTER TABLE `kku_enrollments`
-  MODIFY `enrollment_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of KKU enrollment record';
+  MODIFY `enrollment_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of KKU enrollment record', AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `kku_enrollment_curricula`
 --
 ALTER TABLE `kku_enrollment_curricula`
-  MODIFY `enrollment_curriculum_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of enrollment curriculum record';
+  MODIFY `enrollment_curriculum_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of enrollment curriculum record', AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `org_departments`
 --
 ALTER TABLE `org_departments`
-  MODIFY `department_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `department_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `org_faculties`
 --
 ALTER TABLE `org_faculties`
-  MODIFY `faculty_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `faculty_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `org_universities`
 --
 ALTER TABLE `org_universities`
-  MODIFY `university_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `university_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `persons`
 --
 ALTER TABLE `persons`
-  MODIFY `person_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key for person';
+  MODIFY `person_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key for person', AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `score_session_competency_evidences`
 --
 ALTER TABLE `score_session_competency_evidences`
-  MODIFY `session_competency_evidence_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of score evidence record';
+  MODIFY `session_competency_evidence_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of score evidence record', AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `score_session_competency_results`
 --
 ALTER TABLE `score_session_competency_results`
-  MODIFY `session_competency_result_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of computed competency result';
+  MODIFY `session_competency_result_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of computed competency result', AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `score_session_competency_scores`
 --
 ALTER TABLE `score_session_competency_scores`
-  MODIFY `session_competency_score_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of score record';
+  MODIFY `session_competency_score_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key of score record', AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables

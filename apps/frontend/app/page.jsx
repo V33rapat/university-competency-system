@@ -226,8 +226,10 @@ export default function CompetencyPage() {
             const data = selectedCompetencies.map(id => periodData[id] || 0);
 
             // Create label
-            const startMonthName = MONTHS[startMonth - 1]?.short || '';
-            const endMonthName = MONTHS[endMonth - 1]?.short || '';
+            const startMonthObj = MONTHS[startMonth - 1];
+            const endMonthObj = MONTHS[endMonth - 1];
+            const startMonthName = startMonthObj ? t(`${startMonthObj.id}_short`) : '';
+            const endMonthName = endMonthObj ? t(`${endMonthObj.id}_short`) : '';
             let label = '';
             if (startYear === endYear && startMonth === endMonth) {
                 label = `${startMonthName} ${startYear}`;

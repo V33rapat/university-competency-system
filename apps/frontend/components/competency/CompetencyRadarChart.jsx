@@ -180,7 +180,7 @@ const CompetencyRadarChart = ({
                 <span className="year-badge">
                     {filterMode === 'year'
                         ? `${t('year') || 'ปี'} ${selectedYears.join(', ')}`
-                        : `${months[dateRange.startMonth - 1]?.short} ${dateRange.startYear} - ${months[dateRange.endMonth - 1]?.short} ${dateRange.endYear}`
+                        : `${months[dateRange.startMonth - 1] ? t(months[dateRange.startMonth - 1].id + '_short') : ''} ${dateRange.startYear} - ${months[dateRange.endMonth - 1] ? t(months[dateRange.endMonth - 1].id + '_short') : ''} ${dateRange.endYear}`
                     }
                 </span>
             </div>

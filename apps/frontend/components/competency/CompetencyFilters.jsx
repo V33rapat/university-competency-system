@@ -114,7 +114,7 @@ const CompetencyFilters = ({
                                 onChange={(e) => setDateRange({ ...dateRange, startMonth: parseInt(e.target.value) })}
                             >
                                 {months.map((month, idx) => (
-                                    <option key={month.id} value={idx + 1}>{month.label}</option>
+                                    <option key={month.id} value={idx + 1}>{t(month.id)}</option>
                                 ))}
                             </select>
                             <select
@@ -141,7 +141,7 @@ const CompetencyFilters = ({
                                 onChange={(e) => setDateRange({ ...dateRange, endMonth: parseInt(e.target.value) })}
                             >
                                 {months.map((month, idx) => (
-                                    <option key={month.id} value={idx + 1}>{month.label}</option>
+                                    <option key={month.id} value={idx + 1}>{t(month.id)}</option>
                                 ))}
                             </select>
                             <select

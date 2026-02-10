@@ -25,6 +25,7 @@ import CompetencyStats from '../components/competency/CompetencyStats';
 import CompetencyRadarChart from '../components/competency/CompetencyRadarChart';
 import ActivityDetailPanel from '../components/competency/ActivityDetailPanel';
 import GapAnalysis from '../components/competency/GapAnalysis';
+import LoadingSkeleton from '../components/competency/LoadingSkeleton';
 import { useAuth } from '../providers/auth-provider';
 import { useLanguage } from '../providers/LanguageContext';
 
@@ -318,6 +319,10 @@ export default function CompetencyPage() {
         [filterMode, selectedYears, dateRange, activitiesByCompetency]
     );
 
+    if (dataLoading) {
+        return <LoadingSkeleton />;
+    }
+
     return (
         <CompetencyLayout
             activePage={activePage}
@@ -326,12 +331,7 @@ export default function CompetencyPage() {
             loading={loading}
             onLogout={handleLogout}
         >
-            {dataLoading && (
-                <div className="card" style={{ margin: '1.5rem' }}>
-                    {t('loading')}
-                </div>
-            )}
-            {!dataLoading && dataError && (
+            {dataError && (
                 <div className="card" style={{ margin: '1.5rem', color: '#b91c1c' }}>
                     {dataError}
                 </div>

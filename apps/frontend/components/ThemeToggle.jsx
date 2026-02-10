@@ -1,52 +1,42 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useTheme } from 'next-themes';
+import React from 'react';
+import { useTheme } from '../providers/theme-provider';
 import { Sun, Moon } from 'lucide-react';
 
-const ThemeToggle = () => {
-    const { theme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-
-    // useEffect only runs on the client, so now we can safely show the UI
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    if (!mounted) {
-        return <div className="w-14 h-8" />; // Placeholder to prevent layout shift
+const ThemeToggle = ({ className = '' }) => {
+    const { resolvedTheme, setTheme } = useTheme();
+    if (!resolvedTheme) {
+        return <div className={`theme-toggle-skeleton ${className}`} />;
     }
 
-    const isDark = theme === 'dark';
+    const isDark = resolvedTheme === 'dark';
 
     return (
         <button
+            type="button"
             onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className={`
-                relative w-16 h-8 rounded-full p-1 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/50
-                ${isDark ? 'bg-slate-700' : 'bg-sky-200'}
-            `}
-            aria-label="Toggle Theme"
+            className={`theme-toggle-btn ${isDark ? 'dark' : 'light'} ${className}`}
+            aria-label="Toggle theme"
+            aria-pressed={isDark}
         >
-            <div
-                className={`
-                    absolute left-1 top-1 bottom-1 w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 flex items-center justify-center
-                    ${isDark ? 'translate-x-8 bg-slate-800' : 'translate-x-0 bg-white'}
-                `}
-            >
-                {isDark ? (
-                    <Moon size={14} className="text-yellow-300" />
-                ) : (
-                    <Sun size={14} className="text-orange-400" />
-                )}
-            </div>
+            <div className="theme-toggle-track">
+                {/* Background icons */}
+                <div className="theme-toggle-icon sun-icon">
+                    <Sun size={13} strokeWidth={2.5} />
+                </div>
+                <div className="theme-toggle-icon moon-icon">
+                    <Moon size={13} strokeWidth={2.5} />
+                </div>
 
-            {/* Background Icons (Decorative) */}
-            <div className={`absolute left-2 top-1.5 transition-opacity duration-300 ${isDark ? 'opacity-0' : 'opacity-100'}`}>
-
-            </div>
-            <div className={`absolute right-2 top-1.5 transition-opacity duration-300 ${isDark ? 'opacity-100' : 'opacity-0'}`}>
-
+                {/* Sliding thumb with active icon */}
+                <div className="theme-toggle-thumb">
+                    {isDark ? (
+                        <Moon size={13} strokeWidth={2.5} className="thumb-icon-dark" />
+                    ) : (
+                        <Sun size={13} strokeWidth={2.5} className="thumb-icon-light" />
+                    )}
+                </div>
             </div>
         </button>
     );

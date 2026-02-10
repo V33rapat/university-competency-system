@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Filter, Brain, Calendar, Target, Check } from 'lucide-react';
+import { useLanguage } from '../../providers/LanguageContext';
 
 const CompetencyFilters = ({
     allCompetencies,
@@ -18,12 +19,14 @@ const CompetencyFilters = ({
     showRequirement,
     setShowRequirement
 }) => {
+    const { t } = useLanguage();
+
     return (
         <div className="filter-section card">
             <div className="card-header">
                 <h2>
                     <Filter size={20} className="section-icon" />
-                    ตัวกรอง
+                    {t('filter')}
                 </h2>
             </div>
 
@@ -31,7 +34,7 @@ const CompetencyFilters = ({
             <div className="filter-group">
                 <label>
                     <Brain size={14} />
-                    เลือกสมรรถนะ
+                    {t('select_competency_label')}
                 </label>
                 <div className="competency-chips">
                     {allCompetencies.map(comp => {
@@ -56,20 +59,20 @@ const CompetencyFilters = ({
             <div className="filter-group">
                 <label>
                     <Filter size={14} />
-                    โหมดการกรอง
+                    {t('filter_mode')}
                 </label>
                 <div className="mode-toggle">
                     <button
                         className={`mode-btn ${filterMode === 'year' ? 'active' : ''}`}
                         onClick={() => setFilterMode('year')}
                     >
-                        เปรียบเทียบปี
+                        {t('compare_years')}
                     </button>
                     <button
                         className={`mode-btn ${filterMode === 'range' ? 'active' : ''}`}
                         onClick={() => setFilterMode('range')}
                     >
-                        ช่วงเวลา
+                        {t('date_range_mode')}
                     </button>
                 </div>
             </div>
@@ -79,7 +82,7 @@ const CompetencyFilters = ({
                 <div className="filter-group">
                     <label>
                         <Calendar size={14} />
-                        ปีการศึกษา (เลือกได้หลายปี)
+                        {t('academic_year')}
                     </label>
                     <div className="year-buttons">
                         {years.map(year => (
@@ -102,7 +105,7 @@ const CompetencyFilters = ({
                     <div className="filter-group">
                         <label>
                             <Calendar size={14} />
-                            ช่วงเวลาเริ่มต้น
+                            {t('start_range')}
                         </label>
                         <div className="date-range-row">
                             <select
@@ -129,7 +132,7 @@ const CompetencyFilters = ({
                     <div className="filter-group">
                         <label>
                             <Calendar size={14} />
-                            ช่วงเวลาสิ้นสุด
+                            {t('end_range')}
                         </label>
                         <div className="date-range-row">
                             <select
@@ -159,7 +162,7 @@ const CompetencyFilters = ({
             <div className="filter-group toggle-group">
                 <label>
                     <Target size={14} />
-                    แสดงเกณฑ์หลักสูตร
+                    {t('show_requirement')}
                 </label>
                 <button
                     className={`toggle-switch ${showRequirement ? 'on' : ''}`}

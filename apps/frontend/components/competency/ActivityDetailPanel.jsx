@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../providers/LanguageContext';
 
 const ActivityDetailPanel = ({
     activeCompetency,
@@ -14,6 +15,8 @@ const ActivityDetailPanel = ({
     selectedYears,
     dateRange
 }) => {
+    const { t } = useLanguage();
+
     if (!activeCompetency) return null;
 
     const comp = competencies.find(c => c.id === activeCompetency);
@@ -32,7 +35,7 @@ const ActivityDetailPanel = ({
                         {Icon && <Icon size={20} />}
                     </div>
                     <span>{comp?.name}</span>
-                    <span className="score-badge">{formatNumber(totalEarned, 2)} คะแนน</span>
+                    <span className="score-badge">{formatNumber(totalEarned, 2)} {t('score')}</span>
                 </h2>
                 <button className="close-btn" onClick={() => { setActiveCompetency(null); setActiveDetailYear(null); }}>
                     <X size={18} />
@@ -48,7 +51,7 @@ const ActivityDetailPanel = ({
                             className={`year-tab ${(activeDetailYear || selectedYears[0]) === year ? 'active' : ''}`}
                             onClick={() => setActiveDetailYear(year)}
                         >
-                            ปี {year}
+                            {t('year')} {year}
                         </button>
                     ))}
                 </div>
@@ -57,7 +60,7 @@ const ActivityDetailPanel = ({
             <div className="detail-content">
                 {/* Completed Activities */}
                 <div className="detail-activities">
-                    <h4>กิจกรรมที่ได้รับคะแนนแล้ว</h4>
+                    <h4>{t('scored_activities')}</h4>
                     <div className="activity-cards">
                         {completedActivities.map(act => (
                             <div
@@ -76,15 +79,15 @@ const ActivityDetailPanel = ({
                             </div>
                         ))}
                         {completedActivities.length === 0 && (
-                            <p className="no-activities">ไม่มีกิจกรรมในปีนี้</p>
+                            <p className="no-activities">{t('no_activities_this_year')}</p>
                         )}
                     </div>
                 </div>
 
-                {/* Available Activities - only show for current year (2567 mockup) */}
+                {/* Available Activities */}
                 {activities.some(act => act.status === 'available' && act.year === displayYear) && (
                     <div className="detail-activities available-section">
-                        <h4>กิจกรรมที่สามารถทำเพื่อรับคะแนนได้</h4>
+                        <h4>{t('available_activities')}</h4>
                         <div className="activity-cards">
                             {activities
                                 .filter(act => act.status === 'available' && act.year === displayYear)

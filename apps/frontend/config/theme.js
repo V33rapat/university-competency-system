@@ -6,7 +6,7 @@ export const CHART_COLORS = [
     { bg: 'rgba(16, 185, 129, 0.2)', border: '#10b981' },
 ];
 
-export const BACKGROUND_COLORS = [
+export const LIGHT_BACKGROUND_COLORS = [
     '#ff4b4b', // red
     '#f97316', // orange
     '#facc15', // yellow
@@ -15,6 +15,17 @@ export const BACKGROUND_COLORS = [
     '#a855f7', // violet
     '#ec4899', // pink
     '#ffffff', // soft white blend
+];
+
+export const DARK_BACKGROUND_COLORS = [
+    '#ef4444', // red
+    '#f97316', // orange
+    '#d97706', // amber
+    '#22c55e', // green
+    '#2563eb', // blue
+    '#7c3aed', // violet
+    '#db2777', // pink
+    '#000000', // deep black blend
 ];
 
 export const FONTS = {

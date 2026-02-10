@@ -3,6 +3,21 @@ const DEFAULT_API_BASE_URL = 'http://localhost:8080';
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || DEFAULT_API_BASE_URL;
 
+const toErrorMessage = (payload, status) => {
+  if (typeof payload === 'string' && payload.trim()) return payload;
+
+  const candidates = [payload?.message, payload?.error, payload?.detail];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) return candidate;
+    if (candidate && typeof candidate === 'object') {
+      const nested = candidate.message || candidate.error;
+      if (typeof nested === 'string' && nested.trim()) return nested;
+    }
+  }
+
+  return `Request failed with status ${status}`;
+};
+
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE_URL}${path}`;
   const headers = {
@@ -28,9 +43,10 @@ export async function apiFetch(path, options = {}) {
   }
 
   if (!response.ok) {
-    const message =
-      data?.message || data?.error || `Request failed with status ${response.status}`;
-    throw new Error(message);
+    const message = toErrorMessage(data, response.status);
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
   }
 
   return data;

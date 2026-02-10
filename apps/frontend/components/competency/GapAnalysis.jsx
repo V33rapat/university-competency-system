@@ -1,19 +1,24 @@
+'use client';
+
 import React from 'react';
 import { Info } from 'lucide-react';
+import { useLanguage } from '../../providers/LanguageContext';
 
 const GapAnalysis = ({
     competencies,
     scores,
     requirements
 }) => {
+    const { t } = useLanguage();
+
     return (
         <div className="gap-section card">
             <div className="card-header">
                 <h2>
                     <Info size={20} className="section-icon" />
-                    วิเคราะห์ช่องว่าง (Gap Analysis)
+                    {t('gap_analysis')}
                 </h2>
-                <span className="info-badge">เทียบกับเกณฑ์หลักสูตร</span>
+                <span className="info-badge">{t('compared_to_requirement')}</span>
             </div>
             <div className="gap-grid">
                 {competencies.map(id => {
@@ -43,8 +48,8 @@ const GapAnalysis = ({
                                 ></div>
                             </div>
                             <div className="gap-labels">
-                                <span>คะแนน: {formatNumber(score, 2)}</span>
-                                <span>เป้าหมาย: {formatNumber(target, 2)}</span>
+                                <span>{t('score')}: {formatNumber(score, 2)}</span>
+                                <span>{t('target')}: {formatNumber(target, 2)}</span>
                             </div>
                         </div>
                     );

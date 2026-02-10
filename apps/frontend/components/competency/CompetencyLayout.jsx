@@ -6,15 +6,20 @@ import {
     Menu, X, ChevronDown, LogOut
 } from 'lucide-react';
 import ColorBends from '../ColorBends';
-import { BACKGROUND_COLORS } from '../../config/theme';
+import { DARK_BACKGROUND_COLORS, LIGHT_BACKGROUND_COLORS } from '../../config/theme';
 import { useLanguage } from '../../providers/LanguageContext';
 import LanguageSwitcher from '../LanguageSwitcher';
 import ThemeToggle from '../ThemeToggle';
+import { useTheme } from '../../providers/theme-provider';
 
 const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onLogout }) => {
     const { t } = useLanguage();
+    const { resolvedTheme } = useTheme();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+    const isDark = resolvedTheme === 'dark';
+    const blendColors = isDark ? DARK_BACKGROUND_COLORS : LIGHT_BACKGROUND_COLORS;
 
     const handleNavigate = (page) => {
         onNavigate(page);
@@ -35,7 +40,7 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
             <ColorBends
                 className="color-bends-bg"
                 transparent={true}
-                colors={BACKGROUND_COLORS}
+                colors={blendColors}
                 rotation={0}
                 autoRotate={0}
                 speed={0.2}
@@ -50,8 +55,9 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                     inset: 0,
                     zIndex: -1,
                     pointerEvents: 'none',
-                    background: '#ffffff',
-                    opacity: 0.5,
+                    background: isDark ? '#000000' : '#ffffff',
+                    opacity: isDark ? 0.42 : 0.5,
+                    transition: 'background-color 350ms ease, opacity 350ms ease',
                 }}
             />
             <div className="competency-app">
@@ -89,8 +95,8 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                             </button>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center gap-4">
+                        <div className="nav-right-section">
+                            <div className="desktop-quick-controls">
                                 <ThemeToggle />
                                 <LanguageSwitcher />
                             </div>
@@ -116,6 +122,12 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                                         </button>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Mobile: quick controls visible outside burger */}
+                            <div className="mobile-inline-controls">
+                                <ThemeToggle />
+                                <LanguageSwitcher />
                             </div>
 
                             <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -167,10 +179,6 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                                     <span className="user-name">{loading ? t('loading') : userDisplayName}</span>
                                     <span className="user-role">Role: {primaryRole}</span>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-4 px-4 py-2 justify-center border-t border-gray-100 dark:border-gray-800 mt-2 pt-4">
-                                <ThemeToggle />
-                                <LanguageSwitcher />
                             </div>
                             {user && (
                                 <div className="mobile-logout-wrap">

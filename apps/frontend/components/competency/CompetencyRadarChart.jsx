@@ -12,6 +12,8 @@ import {
 } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
 import { Sparkles } from 'lucide-react';
+import { useTheme } from '../../providers/theme-provider';
+import { useLanguage } from '../../providers/LanguageContext';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
@@ -30,6 +32,9 @@ const CompetencyRadarChart = ({
     const chartRef = useRef(null);
     const [chartLabelRadius, setChartLabelRadius] = useState(165);
     const [dpr, setDpr] = useState(1);
+    const { resolvedTheme } = useTheme();
+    const { t } = useLanguage();
+    const isDark = resolvedTheme === 'dark';
 
     // Dynamic radius for chart labels based on screen size
     useEffect(() => {
@@ -61,15 +66,18 @@ const CompetencyRadarChart = ({
             const firstPoint = points[0];
             const compId = selectedCompetencies[firstPoint.index];
             const datasetIndex = firstPoint.datasetIndex;
-
-            // Logic to determine year/context from datasetIndex
-            // This depends on how datasets are constructed in parent or here.
-            // Assuming parent provides data in a specific order: [Year1, Year2, ...] or [DateRange] + [Requirement?]
-            // We might need to bubble up the index or context.
-
             onCompetencyClick(compId, datasetIndex);
         }
     };
+
+    // Theme-aware chart colors
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.05)';
+    const angleLineColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)';
+    const tickColor = isDark ? 'rgba(255, 255, 255, 0.7)' : '#64748b';
+    const tooltipBg = isDark ? '#1e293b' : 'white';
+    const tooltipTitleColor = isDark ? '#f1f5f9' : '#0f172a';
+    const tooltipBodyColor = isDark ? '#cbd5e1' : '#475569';
+    const tooltipBorderColor = isDark ? '#475569' : '#e2e8f0';
 
     const radarOptions = {
         onClick: handleChartClick,
@@ -81,16 +89,16 @@ const CompetencyRadarChart = ({
         },
         scales: {
             r: {
-                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                angleLines: { color: angleLineColor },
                 suggestedMin: 0,
                 suggestedMax: 100,
                 ticks: {
                     stepSize: 25,
                     backdropColor: 'transparent',
-                    color: '#64748b',
+                    color: tickColor,
                     font: { size: 10 }
                 },
-                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                grid: { color: gridColor },
                 pointLabels: {
                     display: false // We use custom labels
                 }
@@ -101,10 +109,10 @@ const CompetencyRadarChart = ({
                 display: false
             },
             tooltip: {
-                backgroundColor: 'white',
-                titleColor: '#0f172a',
-                bodyColor: '#475569',
-                borderColor: '#e2e8f0',
+                backgroundColor: tooltipBg,
+                titleColor: tooltipTitleColor,
+                bodyColor: tooltipBodyColor,
+                borderColor: tooltipBorderColor,
                 borderWidth: 1,
                 padding: 12,
                 cornerRadius: 8,
@@ -115,7 +123,7 @@ const CompetencyRadarChart = ({
                         const comp = competencies.find(c => c.id === compId);
                         return comp?.name || '';
                     },
-                    afterBody: () => '(คลิกเพื่อดูรายละเอียด)'
+                    afterBody: () => t('click_for_details') || '(คลิกเพื่อดูรายละเอียด)'
                 }
             }
         },
@@ -141,7 +149,6 @@ const CompetencyRadarChart = ({
                     className={`chart-label ${isActive ? 'active' : ''}`}
                     style={{ transform: `translate(${x}px, ${y}px) translate(-50%, -50%)` }}
                     onClick={() => {
-                        // If clicking label, we default to "first dataset" equivalent or just toggle
                         onCompetencyClick(id, 0);
                     }}
                 >
@@ -168,11 +175,11 @@ const CompetencyRadarChart = ({
             <div className="card-header">
                 <h2>
                     <Sparkles size={20} className="section-icon" />
-                    กราฟสมรรถนะ
+                    {t('competency_chart') || 'กราฟสมรรถนะ'}
                 </h2>
                 <span className="year-badge">
                     {filterMode === 'year'
-                        ? `ปี ${selectedYears.join(', ')}`
+                        ? `${t('year') || 'ปี'} ${selectedYears.join(', ')}`
                         : `${months[dateRange.startMonth - 1]?.short} ${dateRange.startYear} - ${months[dateRange.endMonth - 1]?.short} ${dateRange.endYear}`
                     }
                 </span>
@@ -182,14 +189,14 @@ const CompetencyRadarChart = ({
                     {renderChartLabels()}
                 </div>
                 <div className="chart-canvas">
-                    <Radar key={dpr} ref={chartRef} data={chartData} options={radarOptions} />
+                    <Radar key={`${dpr}-${resolvedTheme}`} ref={chartRef} data={chartData} options={radarOptions} />
                 </div>
             </div>
 
             {/* Custom Legend */}
             <div className="chart-custom-legend">
                 {chartData.datasets
-                    .filter(ds => !ds.label.includes('เกณฑ์'))
+                    .filter(ds => !ds.isRequirement)
                     .map((ds, i) => (
                         <div key={i} className="legend-item">
                             <div
@@ -202,7 +209,7 @@ const CompetencyRadarChart = ({
                 {showRequirement && (
                     <div className="legend-item">
                         <div className="legend-color dashed" style={{ borderColor: '#ef4444' }}></div>
-                        <span>เกณฑ์หลักสูตร</span>
+                        <span>{t('requirement')}</span>
                     </div>
                 )}
             </div>

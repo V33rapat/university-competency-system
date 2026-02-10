@@ -34,7 +34,7 @@ import './Competency.css';
 export default function CompetencyPage() {
     const router = useRouter();
     const { user, loading, logout } = useAuth();
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [activePage, setActivePage] = useState('dashboard');
 
     // Dashboard States
@@ -96,13 +96,17 @@ export default function CompetencyPage() {
             try {
                 const response = await fetchCompetencyDashboard();
                 const payload = response?.data || response;
-                const styledCompetencies = (payload.competencies || []).map((comp) => ({
-                    id: comp.id,
-                    code: comp.code,
-                    name: t(comp.code) || comp.name_th || comp.name_en || comp.code,
-                    icon: getCompetencyIcon(comp.code),
-                    color: getCompetencyColor(comp.code),
-                }));
+                const styledCompetencies = (payload.competencies || []).map((comp) => {
+                    return {
+                        id: comp.id,
+                        code: comp.code,
+                        name_th: comp.name_th || '',
+                        name_en: comp.name_en || '',
+                        name: comp.name_th || comp.name_en || comp.code,
+                        icon: getCompetencyIcon(comp.code),
+                        color: getCompetencyColor(comp.code),
+                    };
+                });
                 const activityMap = {};
                 Object.entries(payload.activities || {}).forEach(([key, value]) => {
                     activityMap[Number(key)] = value || [];
@@ -126,14 +130,33 @@ export default function CompetencyPage() {
                     }));
                 }
             } catch (error) {
-                setDataError(error?.message || t('error_loading'));
+                if (error?.status === 401) {
+                    await logout();
+                    router.replace('/login');
+                    return;
+                }
+                setDataError(error?.message || 'Error loading data');
             } finally {
                 setDataLoading(false);
             }
         };
 
         loadDashboard();
-    }, [user, t]); // Added t as dependency
+    }, [user, logout, router]);
+
+
+
+    useEffect(() => {
+        setCompetencies((prev) => prev.map((comp) => {
+            let name;
+            if (language === 'th') {
+                name = comp.name_th || t(comp.code) || comp.name_en || comp.code;
+            } else {
+                name = comp.name_en || t(comp.code) || comp.name_th || comp.code;
+            }
+            return { ...comp, name };
+        }));
+    }, [language, t]);
 
     const handleLogout = async () => {
         await logout();
@@ -183,7 +206,7 @@ export default function CompetencyPage() {
                 const data = selectedCompetencies.map(id => yearData[id] || 0);
 
                 datasets.push({
-                    label: `Year ${year}`,
+                    label: `${t('year')} ${year}`,
                     data,
                     backgroundColor: CHART_COLORS[index % CHART_COLORS.length].bg,
                     borderColor: CHART_COLORS[index % CHART_COLORS.length].border,
@@ -239,6 +262,7 @@ export default function CompetencyPage() {
                 borderDash: [5, 5],
                 pointBackgroundColor: '#ef4444',
                 pointRadius: 4,
+                isRequirement: true,
             });
         }
 

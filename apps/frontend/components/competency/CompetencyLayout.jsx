@@ -3,18 +3,28 @@
 import React, { useState } from 'react';
 import {
     GraduationCap, LayoutDashboard, User, ClipboardCheck,
-    Menu, X
+    Menu, X, ChevronDown, LogOut
 } from 'lucide-react';
 import ColorBends from '../ColorBends';
 import { BACKGROUND_COLORS } from '../../config/theme';
 
-const CompetencyLayout = ({ children, activePage, onNavigate }) => {
+const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onLogout }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
     const handleNavigate = (page) => {
         onNavigate(page);
         setMobileMenuOpen(false);
     };
+
+    const userDisplayName = user?.display_name || user?.username || 'Guest';
+    const primaryRole = user?.roles?.[0] || 'No Role';
+    const avatarLabel = userDisplayName
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join('') || 'U';
 
     return (
         <>
@@ -75,12 +85,27 @@ const CompetencyLayout = ({ children, activePage, onNavigate }) => {
                             </button>
                         </div>
 
-                        <div className="user-area">
-                            <div className="user-info">
-                                <span className="user-name">Kitsanapong P.</span>
-                                <span className="user-role">นักศึกษา</span>
-                            </div>
-                            <div className="avatar">KP</div>
+                        <div className="user-area-wrapper">
+                            <button
+                                type="button"
+                                className="user-area"
+                                onClick={() => setUserMenuOpen((prev) => !prev)}
+                            >
+                                <div className="user-info">
+                                    <span className="user-name">{loading ? 'Checking session...' : userDisplayName}</span>
+                                    <span className="user-role">{primaryRole}</span>
+                                </div>
+                                <div className="avatar">{avatarLabel}</div>
+                                <ChevronDown size={16} className={`user-chevron ${userMenuOpen ? 'open' : ''}`} />
+                            </button>
+                            {user && userMenuOpen && (
+                                <div className="user-dropdown">
+                                    <button type="button" className="logout-btn" onClick={onLogout}>
+                                        <LogOut size={16} />
+                                        <span>ออกจากระบบ</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -126,12 +151,24 @@ const CompetencyLayout = ({ children, activePage, onNavigate }) => {
                                 </button>
                             </div>
                             <div className="mobile-user-section">
-                                <div className="avatar">KP</div>
+                                <div className="avatar">{avatarLabel}</div>
                                 <div>
-                                    <span className="user-name">Kitsanapong P.</span>
-                                    <span className="user-role">นักศึกษา</span>
+                                    <span className="user-name">{loading ? 'Checking session...' : userDisplayName}</span>
+                                    <span className="user-role">Role: {primaryRole}</span>
                                 </div>
                             </div>
+                            {user && (
+                                <div className="mobile-logout-wrap">
+                                    <button
+                                        type="button"
+                                        className="logout-btn mobile"
+                                        onClick={onLogout}
+                                    >
+                                        <LogOut size={16} />
+                                        <span>Logout</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

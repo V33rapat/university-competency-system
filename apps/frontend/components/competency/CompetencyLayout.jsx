@@ -7,8 +7,12 @@ import {
 } from 'lucide-react';
 import ColorBends from '../ColorBends';
 import { BACKGROUND_COLORS } from '../../config/theme';
+import { useLanguage } from '../../providers/LanguageContext';
+import LanguageSwitcher from '../LanguageSwitcher';
+import ThemeToggle from '../ThemeToggle';
 
 const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onLogout }) => {
+    const { t } = useLanguage();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -67,50 +71,57 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                                 onClick={() => handleNavigate('dashboard')}
                             >
                                 <LayoutDashboard size={18} />
-                                <span>แดชบอร์ด</span>
+                                <span>{t('dashboard')}</span>
                             </button>
                             <button
                                 className={`nav-item ${activePage === 'profile' ? 'active' : ''}`}
                                 onClick={() => handleNavigate('profile')}
                             >
                                 <User size={18} />
-                                <span>ประวัติส่วนตัว</span>
+                                <span>{t('profile')}</span>
                             </button>
                             <button
                                 className={`nav-item ${activePage === 'verify' ? 'active' : ''}`}
                                 onClick={() => handleNavigate('verify')}
                             >
                                 <ClipboardCheck size={18} />
-                                <span>ตรวจสอบข้อมูล</span>
+                                <span>{t('verify')}</span>
                             </button>
                         </div>
 
-                        <div className="user-area-wrapper">
-                            <button
-                                type="button"
-                                className="user-area"
-                                onClick={() => setUserMenuOpen((prev) => !prev)}
-                            >
-                                <div className="user-info">
-                                    <span className="user-name">{loading ? 'Checking session...' : userDisplayName}</span>
-                                    <span className="user-role">{primaryRole}</span>
-                                </div>
-                                <div className="avatar">{avatarLabel}</div>
-                                <ChevronDown size={16} className={`user-chevron ${userMenuOpen ? 'open' : ''}`} />
-                            </button>
-                            {user && userMenuOpen && (
-                                <div className="user-dropdown">
-                                    <button type="button" className="logout-btn" onClick={onLogout}>
-                                        <LogOut size={16} />
-                                        <span>ออกจากระบบ</span>
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:flex items-center gap-4">
+                                <ThemeToggle />
+                                <LanguageSwitcher />
+                            </div>
 
-                        <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-                            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
+                            <div className="user-area-wrapper">
+                                <button
+                                    type="button"
+                                    className="user-area"
+                                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                                >
+                                    <div className="user-info">
+                                        <span className="user-name">{loading ? t('loading') : userDisplayName}</span>
+                                        <span className="user-role">{primaryRole}</span>
+                                    </div>
+                                    <div className="avatar">{avatarLabel}</div>
+                                    <ChevronDown size={16} className={`user-chevron ${userMenuOpen ? 'open' : ''}`} />
+                                </button>
+                                {user && userMenuOpen && (
+                                    <div className="user-dropdown">
+                                        <button type="button" className="logout-btn" onClick={onLogout}>
+                                            <LogOut size={16} />
+                                            <span>{t('logout')}</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                            </button>
+                        </div>
                     </div>
                 </nav>
 
@@ -133,29 +144,33 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                                     onClick={() => handleNavigate('dashboard')}
                                 >
                                     <LayoutDashboard size={20} />
-                                    <span>แดชบอร์ด</span>
+                                    <span>{t('dashboard')}</span>
                                 </button>
                                 <button
                                     className={`mobile-nav-item ${activePage === 'profile' ? 'active' : ''}`}
                                     onClick={() => handleNavigate('profile')}
                                 >
                                     <User size={20} />
-                                    <span>ประวัติส่วนตัว</span>
+                                    <span>{t('profile')}</span>
                                 </button>
                                 <button
                                     className={`mobile-nav-item ${activePage === 'verify' ? 'active' : ''}`}
                                     onClick={() => handleNavigate('verify')}
                                 >
                                     <ClipboardCheck size={20} />
-                                    <span>ตรวจสอบข้อมูล</span>
+                                    <span>{t('verify')}</span>
                                 </button>
                             </div>
                             <div className="mobile-user-section">
                                 <div className="avatar">{avatarLabel}</div>
                                 <div>
-                                    <span className="user-name">{loading ? 'Checking session...' : userDisplayName}</span>
+                                    <span className="user-name">{loading ? t('loading') : userDisplayName}</span>
                                     <span className="user-role">Role: {primaryRole}</span>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-4 px-4 py-2 justify-center border-t border-gray-100 dark:border-gray-800 mt-2 pt-4">
+                                <ThemeToggle />
+                                <LanguageSwitcher />
                             </div>
                             {user && (
                                 <div className="mobile-logout-wrap">
@@ -165,7 +180,7 @@ const CompetencyLayout = ({ children, activePage, onNavigate, user, loading, onL
                                         onClick={onLogout}
                                     >
                                         <LogOut size={16} />
-                                        <span>Logout</span>
+                                        <span>{t('logout')}</span>
                                     </button>
                                 </div>
                             )}

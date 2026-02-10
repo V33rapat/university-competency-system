@@ -26,6 +26,7 @@ import CompetencyRadarChart from '../components/competency/CompetencyRadarChart'
 import ActivityDetailPanel from '../components/competency/ActivityDetailPanel';
 import GapAnalysis from '../components/competency/GapAnalysis';
 import { useAuth } from '../providers/auth-provider';
+import { useLanguage } from '../providers/LanguageContext';
 
 // CSS
 import './Competency.css';
@@ -33,6 +34,7 @@ import './Competency.css';
 export default function CompetencyPage() {
     const router = useRouter();
     const { user, loading, logout } = useAuth();
+    const { t } = useLanguage();
     const [activePage, setActivePage] = useState('dashboard');
 
     // Dashboard States
@@ -97,7 +99,7 @@ export default function CompetencyPage() {
                 const styledCompetencies = (payload.competencies || []).map((comp) => ({
                     id: comp.id,
                     code: comp.code,
-                    name: comp.name_th || comp.name_en || comp.code,
+                    name: t(comp.code) || comp.name_th || comp.name_en || comp.code,
                     icon: getCompetencyIcon(comp.code),
                     color: getCompetencyColor(comp.code),
                 }));
@@ -124,14 +126,14 @@ export default function CompetencyPage() {
                     }));
                 }
             } catch (error) {
-                setDataError(error?.message || 'โหลดข้อมูลไม่สำเร็จ');
+                setDataError(error?.message || t('error_loading'));
             } finally {
                 setDataLoading(false);
             }
         };
 
         loadDashboard();
-    }, [user]);
+    }, [user, t]); // Added t as dependency
 
     const handleLogout = async () => {
         await logout();
@@ -181,7 +183,7 @@ export default function CompetencyPage() {
                 const data = selectedCompetencies.map(id => yearData[id] || 0);
 
                 datasets.push({
-                    label: `ปี ${year}`,
+                    label: `Year ${year}`,
                     data,
                     backgroundColor: CHART_COLORS[index % CHART_COLORS.length].bg,
                     borderColor: CHART_COLORS[index % CHART_COLORS.length].border,
@@ -229,7 +231,7 @@ export default function CompetencyPage() {
         if (showRequirement) {
             const reqData = selectedCompetencies.map(id => requirements[id] || 0);
             datasets.push({
-                label: 'เกณฑ์หลักสูตร',
+                label: t('requirement'),
                 data: reqData,
                 backgroundColor: 'transparent',
                 borderColor: '#ef4444',
@@ -302,7 +304,7 @@ export default function CompetencyPage() {
         >
             {dataLoading && (
                 <div className="card" style={{ margin: '1.5rem' }}>
-                    กำลังโหลดข้อมูลสมรรถนะ...
+                    {t('loading')}
                 </div>
             )}
             {!dataLoading && dataError && (
@@ -378,16 +380,16 @@ export default function CompetencyPage() {
                         <div className="profile-card card">
                             <div className="profile-avatar">KP</div>
                             <h3>Kitsanapong Panasri</h3>
-                            <p>รหัสนักศึกษา: 6530xxxxx</p>
-                            <p>คณะวิศวกรรมศาสตร์</p>
-                            <p>สาขาวิศวกรรมคอมพิวเตอร์</p>
+                            <p>Student ID: 6530xxxxx</p>
+                            <p>Faculty of Engineering</p>
+                            <p>Computer Engineering</p>
                         </div>
 
                         <div className="activity-history card">
                             <div className="card-header">
                                 <h2>
                                     <Award size={20} className="section-icon" />
-                                    กิจกรรมล่าสุด
+                                    {t('activity_history')}
                                 </h2>
                             </div>
                             <div className="activity-list">
@@ -399,7 +401,7 @@ export default function CompetencyPage() {
                                             <span>{act.date}</span>
                                         </div>
                                         <div className="activity-status verified">
-                                            ยืนยันแล้ว
+                                            {t('verified')}
                                         </div>
                                     </div>
                                 ))}
@@ -416,17 +418,17 @@ export default function CompetencyPage() {
                         <div className="card-header">
                             <h2>
                                 <Activity size={20} className="section-icon" />
-                                รายการกิจกรรมทั้งหมด
+                                {t('activities')}
                             </h2>
                         </div>
                         <table className="data-table">
                             <thead>
                                 <tr>
-                                    <th>กิจกรรม</th>
-                                    <th>วันที่</th>
-                                    <th>ประเภท</th>
-                                    <th>คะแนน</th>
-                                    <th>สถานะ</th>
+                                    <th>{t('activities')}</th>
+                                    <th>{t('date')}</th>
+                                    <th>{t('type')}</th>
+                                    <th>{t('score')}</th>
+                                    <th>{t('verified')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -447,7 +449,7 @@ export default function CompetencyPage() {
                                                 <td><strong>+{formatNumber(act.score, 2)}</strong></td>
                                                 <td>
                                                     <span className="status-badge verified">
-                                                        ✓ ยืนยันแล้ว
+                                                        ✓ {t('verified')}
                                                     </span>
                                                 </td>
                                             </tr>

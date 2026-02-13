@@ -146,6 +146,11 @@ body:has(.competency-app) {
   justify-content: center;
 }
 
+.logo-img {
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 .logo-text {
   font-size: 1.2rem;
   font-weight: 700;

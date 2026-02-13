@@ -1,12 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '../providers/theme-provider';
 import { Sun, Moon } from 'lucide-react';
 
 const ThemeToggle = ({ className = '' }) => {
     const { resolvedTheme, setTheme } = useTheme();
-    if (!resolvedTheme) {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted || !resolvedTheme) {
         return <div className={`theme-toggle-skeleton ${className}`} />;
     }
 

@@ -6,13 +6,17 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, AlertCircle, KeyRound } from 'lucide-react';
 import ClickSpark from '../../components/ClickSpark';
+import LanguageSwitcher from '../../components/LanguageSwitcher';
+import ThemeToggle from '../../components/ThemeToggle';
 import { useAuth } from '../../providers/auth-provider';
+import { useLanguage } from '../../providers/LanguageContext';
 import '../Competency.css';
 import './login.css';
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, loading, login } = useAuth();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -33,7 +37,7 @@ export default function LoginPage() {
       await login(email, password);
       router.replace('/');
     } catch (err) {
-      setError(err?.message || 'Unable to login.');
+      setError(err?.message || t('login_error'));
     } finally {
       setSubmitting(false);
     }
@@ -41,6 +45,10 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
+      <div className="login-quick-controls">
+        <ThemeToggle />
+        <LanguageSwitcher />
+      </div>
       <ClickSpark sparkColor="#2563eb" sparkSize={10} sparkRadius={15} sparkCount={8} duration={400}>
         <div className="login-card">
           {/* ───── Brand ───── */}
@@ -53,15 +61,15 @@ export default function LoginPage() {
               className="login-logo-img"
               priority
             />
-            <h1>KKU Competency System</h1>
-            <p>Sign in to access the competency</p>
+            <h1>{t('login_title')}</h1>
+            <p>{t('login_subtitle')}</p>
           </div>
 
           {/* ───── Form ───── */}
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="login-field">
               <label htmlFor="email">
-                <Mail size={16} /> Email
+                <Mail size={16} /> {t('login_email')}
               </label>
               <input
                 id="email"
@@ -76,7 +84,7 @@ export default function LoginPage() {
 
             <div className="login-field">
               <label htmlFor="password">
-                <Lock size={16} /> Password
+                <Lock size={16} /> {t('login_password')}
               </label>
               <input
                 id="password"
@@ -104,16 +112,16 @@ export default function LoginPage() {
               {submitting ? (
                 <>
                   <span className="btn-spinner" />
-                  Signing in…
+                  {t('login_signing_in')}
                 </>
               ) : (
-                'Sign In'
+                t('login_signin')
               )}
             </button>
 
             {/* ── divider ── */}
             <div className="login-divider">
-              <span>or</span>
+              <span>{t('login_or')}</span>
             </div>
 
             {/* ── SSO (disabled) ── */}
@@ -124,7 +132,7 @@ export default function LoginPage() {
               title="SSO is coming soon"
             >
               <KeyRound size={18} />
-              Sign In with KKU Email
+              {t('login_sso')}
             </button>
           </form>
         </div>

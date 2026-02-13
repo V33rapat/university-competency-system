@@ -90,6 +90,16 @@ const translations = {
         oct_short: 'Oct',
         nov_short: 'Nov',
         dec_short: 'Dec',
+        // Login
+        login_title: 'KKU Competency System',
+        login_subtitle: 'Sign in to access the competency',
+        login_email: 'Email',
+        login_password: 'Password',
+        login_signin: 'Sign In',
+        login_signing_in: 'Signing in…',
+        login_or: 'or',
+        login_sso: 'Sign In with KKU Email',
+        login_error: 'Unable to login.',
     },
     th: {
         dashboard: 'แดชบอร์ด',
@@ -176,6 +186,16 @@ const translations = {
         oct_short: 'ต.ค.',
         nov_short: 'พ.ย.',
         dec_short: 'ธ.ค.',
+        // Login
+        login_title: 'ระบบ Competency',
+        login_subtitle: 'ลงชื่อเข้าใช้ระบบ Competency',
+        login_email: 'อีเมล',
+        login_password: 'รหัสผ่าน',
+        login_signin: 'เข้าสู่ระบบ',
+        login_signing_in: 'กำลังเข้าสู่ระบบ…',
+        login_or: 'หรือ',
+        login_sso: 'เข้าสู่ระบบด้วย SSO',
+        login_error: 'ไม่สามารถเข้าสู่ระบบได้',
     }
 };
 

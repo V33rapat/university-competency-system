@@ -18,13 +18,23 @@
     overflow: hidden;
 }
 
+.login-quick-controls {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 /* ClickSpark wrapper inherits flex centering */
-.login-page>div {
+.login-page>div:not(.login-quick-controls) {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    min-height: 100vh;
+    height: 100%;
 }
 
 /* subtle decorative blobs */

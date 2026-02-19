@@ -55,6 +55,9 @@ export default function CompetencyPage() {
         endYear: '', endMonth: 1
     });
 
+    // Category: 'activity' | 'course'
+    const [category, setCategory] = useState('activity');
+
     const [showRequirement, setShowRequirement] = useState(false);
 
     // Chart Interaction State
@@ -95,7 +98,7 @@ export default function CompetencyPage() {
             setDataLoading(true);
             setDataError(null);
             try {
-                const response = await fetchCompetencyDashboard();
+            const response = await fetchCompetencyDashboard(category);
                 const payload = response?.data || response;
                 const styledCompetencies = (payload.competencies || []).map((comp) => {
                     return {
@@ -143,7 +146,7 @@ export default function CompetencyPage() {
         };
 
         loadDashboard();
-    }, [user, logout, router]);
+    }, [user, logout, router, category]);
 
 
 
@@ -371,6 +374,8 @@ export default function CompetencyPage() {
                             setDateRange={setDateRange}
                             showRequirement={showRequirement}
                             setShowRequirement={setShowRequirement}
+                            category={category}
+                            setCategory={setCategory}
                         />
                     </div>
 

@@ -139,6 +139,8 @@ const translations = {
         click_for_details: '(คลิกเพื่อดูรายละเอียด)',
         filter: 'ตัวกรอง',
         select_competency_label: 'เลือกสมรรถนะ',
+        select_category_label: 'เลือกหมวดหมู่',
+        courses: 'หลักสูตร',
         filter_mode: 'โหมดการกรอง',
         compare_years: 'เปรียบเทียบปี',
         date_range_mode: 'ช่วงเวลา',

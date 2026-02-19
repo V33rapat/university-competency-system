@@ -10,7 +10,8 @@ cd university-competency-system
 
 2. Install frontend dependencies
 ```bash
-cd ../frontend
+cd apps
+cd frontend
 npm install
 ```
 

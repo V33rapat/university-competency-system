@@ -8,10 +8,11 @@ git clone https://github.com/V33rapat/university-competency-system.git
 cd university-competency-system
 ```
 
-2. Install frontend dependencies
+2. Install Golang Follow is document: https://go.dev/doc/install
+
+3. . Install frontend dependencies
 ```bash
-cd apps
-cd frontend
+cd apps/frontend
 npm install
 ```
 
@@ -20,15 +21,15 @@ Create a .env file in the backend directory with the following:
 (Wait, I'm making it.)
 
 Run the development server:
-  1. Run backend (Before run backend you have to install Golang https://go.dev/dl/
+  1. Run backend
   ```bash
-  cd backend
+  cd apps/backend
   go run ./cmd/api
   ```
 
   2. Run Frontend
   ```bash
-  cd frontend
+  cd ../frontend
   npm run dev
   # or
   yarn dev

@@ -28,6 +28,7 @@ Run the development server:
 
   2. Run Frontend
   ```bash
+  cd frontend
   npm run dev
   # or
   yarn dev

@@ -229,3 +229,60 @@ CREATE TABLE `score_section_competency_results` (
 --   persons            ← crs_section_enrollments.person_id
 --                      ← score_section_competency_scores.person_id
 -- ============================================================
+
+-- ============================================================
+-- NEW TABLE: comp_person_competency_summaries
+-- ตารางรวม earned_percent ทั้งหมดต่อคนต่อ competency
+-- เพื่อเทียบกับ target_percent ใน comp_curriculum_requirements
+-- ============================================================
+--
+-- Logic การคำนวณ total_earned_percent:
+--   SUM ของ earned_percent จากทุกแหล่ง:
+--     - score_session_competency_results  (จาก activity)
+--     - score_section_competency_results  (จาก course)
+--   กรองเฉพาะ competency ที่อยู่ใน curriculum ของ person นั้น
+--
+-- ============================================================
+
+CREATE TABLE `comp_person_competency_summaries` (
+    `summary_id`            bigint UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'Primary key',
+    `person_id`             bigint UNSIGNED NOT NULL COMMENT 'FK to persons',
+    `curriculum_id`         bigint UNSIGNED NOT NULL COMMENT 'FK to edu_curricula',
+    `competency_id`         bigint UNSIGNED NOT NULL COMMENT 'FK to comp_competencies',
+
+    -- คะแนนรวมจากทุกแหล่ง
+    `total_earned_percent`  decimal(6,2) NOT NULL DEFAULT 0.00 COMMENT 'earned_percent รวมจาก activity + course ทั้งหมด',
+
+    -- แยกตามแหล่งที่มาเพื่อ debug และแสดงผล breakdown
+    `earned_from_activity`  decimal(6,2) NOT NULL DEFAULT 0.00 COMMENT 'earned_percent รวมจาก score_session_competency_results',
+    `earned_from_course`    decimal(6,2) NOT NULL DEFAULT 0.00 COMMENT 'earned_percent รวมจาก score_section_competency_results',
+
+    -- snapshot จาก comp_curriculum_requirements ณ เวลาที่ compute
+    `target_percent`        decimal(6,2) NOT NULL DEFAULT 0.00 COMMENT 'Snapshot ของ target_percent จาก comp_curriculum_requirements',
+    `is_achieved`           tinyint NOT NULL DEFAULT 0 COMMENT '1 ถ้า total_earned_percent >= target_percent',
+
+    -- metadata
+    `last_computed_at`      datetime NOT NULL DEFAULT current_timestamp() COMMENT 'เวลาที่ compute ล่าสุด',
+    `computed_by`           bigint UNSIGNED DEFAULT NULL COMMENT 'FK to auth_users หรือ system job',
+    `created_at`            datetime NOT NULL DEFAULT current_timestamp(),
+    `updated_at`            datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+    `deleted_at`            datetime DEFAULT NULL COMMENT 'Soft delete timestamp',
+
+    PRIMARY KEY (`summary_id`),
+
+    -- 1 คนมีได้แค่ 1 summary ต่อ curriculum ต่อ competency
+    UNIQUE KEY `uq_cpcs_person_curriculum_competency` (`person_id`, `curriculum_id`, `competency_id`),
+
+    KEY `idx_cpcs_person`       (`person_id`),
+    KEY `idx_cpcs_curriculum`   (`curriculum_id`),
+    KEY `idx_cpcs_competency`   (`competency_id`),
+    KEY `idx_cpcs_is_achieved`  (`is_achieved`),
+    KEY `idx_cpcs_computed_at`  (`last_computed_at`),
+    KEY `idx_cpcs_deleted_at`   (`deleted_at`),
+
+    CONSTRAINT `fk_cpcs_person`      FOREIGN KEY (`person_id`)      REFERENCES `persons`           (`person_id`)      ON UPDATE CASCADE,
+    CONSTRAINT `fk_cpcs_curriculum`  FOREIGN KEY (`curriculum_id`)  REFERENCES `edu_curricula`     (`curriculum_id`)  ON UPDATE CASCADE,
+    CONSTRAINT `fk_cpcs_competency`  FOREIGN KEY (`competency_id`)  REFERENCES `comp_competencies` (`competency_id`)  ON UPDATE CASCADE
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='รวม earned_percent ทั้งหมดต่อคนต่อ competency เพื่อเทียบกับ target_percent';

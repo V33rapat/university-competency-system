@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Award,
@@ -57,6 +57,10 @@ export default function CompetencyPage() {
 
     // Category: 'activity' | 'course'
     const [category, setCategory] = useState('activity');
+
+    // Course History States
+    const[courseHistory, setCourseHistory] = useState([]);
+    const [courseHistoryLoading, setCourseHistoryLoading] = useState(false);
 
     const [showRequirement, setShowRequirement] = useState(false);
 
@@ -149,7 +153,6 @@ export default function CompetencyPage() {
     }, [user, logout, router, category]);
 
 
-
     useEffect(() => {
         setCompetencies((prev) => prev.map((comp) => {
             let name;
@@ -162,6 +165,17 @@ export default function CompetencyPage() {
         }));
     }, [language, t]);
 
+    /*
+    // useEffect for Course History - Uncomment if API is ready
+    useEffect(() => {
+        if (!user) return;
+        setCourseHistoryLoading(true);
+        fetch('/api/v1/courses-history', {
+            credentials: 'include',
+        })
+        .then(res => {
+    }
+    */
     const handleLogout = async () => {
         await logout();
         router.push('/login');
@@ -436,6 +450,35 @@ export default function CompetencyPage() {
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                            <div className="course-history-list">
+                                <div className="card-header" style={{ marginTop: '1.5rem' }}>
+                                    <h2>
+                                        <Award size={20} className="section-icon" />
+                                        {t('course_history')}
+                                    </h2>
+                                </div>
+                                {courseHistoryLoading ? (
+                                        <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>
+                                            {t('loading')}
+                                        </div>
+                                ): courseHistory.length === 0 ? (
+                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>
+                                        {t('no_course_history')}
+                                    </div>
+                                ) : (
+                                    courseHistory.map(course => (
+                                        <div key={course.id} className="activity-item">
+                                            <div className="activity-badge">{(course.code || 'C').charAt(0)}
+                                                <h4>{course.name}</h4>
+                                                <span>{course.semester} {course.year}</span>
+                                            </div>
+                                            <div className={`activity-status ${course.status === 'completed' ? 'verified' : 'pending'}`}>
+                                                {course.status === 'completed' ? t('completed') : t('pending')}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>

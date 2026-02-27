@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
     Award,
+    BookOpenText,
     Activity,
     Brain,
     Monitor,
@@ -42,7 +43,10 @@ export default function CompetencyPage() {
     const [selectedCompetencies, setSelectedCompetencies] = useState([]);
     const [competencies, setCompetencies] = useState([]);
     const [requirements, setRequirements] = useState({});
-    const [activitiesByCompetency, setActivitiesByCompetency] = useState({});
+
+    // Data Maps for quick access (competencyId -> activities/courses)
+    const [radarChartByCompetency, setRadarChartByCompetency] = useState({});
+
     const [availableYears, setAvailableYears] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);
     const [dataError, setDataError] = useState(null);
@@ -59,8 +63,10 @@ export default function CompetencyPage() {
     const [category, setCategory] = useState('activity');
 
     // Course History States
-    const[courseHistory, setCourseHistory] = useState([]);
-    const [courseHistoryLoading, setCourseHistoryLoading] = useState(false);
+    const[courseHistory, setCourseHistoryMap] = useState([]);
+    
+    // Activity History States
+    const [activityHistory, setActivityHistoryMap] = useState([]);
 
     const [showRequirement, setShowRequirement] = useState(false);
 
@@ -102,7 +108,7 @@ export default function CompetencyPage() {
             setDataLoading(true);
             setDataError(null);
             try {
-            const response = await fetchCompetencyDashboard(category);
+                const response = await fetchCompetencyDashboard(category);
                 const payload = response?.data || response;
                 const styledCompetencies = (payload.competencies || []).map((comp) => {
                     return {
@@ -115,15 +121,36 @@ export default function CompetencyPage() {
                         color: getCompetencyColor(comp.code),
                     };
                 });
+
+                // สร้าง map สำหรับ cometency ทั้งหมด
                 const activityMap = {};
                 Object.entries(payload.activities || {}).forEach(([key, value]) => {
                     activityMap[Number(key)] = value || [];
                 });
+                setRadarChartByCompetency(activityMap);
+
                 const years = normalizeYears(payload.available_years || [], activityMap);
+                
+                // โหลด activity แยกสำหรับ Profile History
+                const actResponse = await fetchCompetencyDashboard('activity');
+                const actPayload = actResponse?.data || actResponse;
+                const actMap = {};
+                Object.entries(actPayload.activities || {}).forEach(([key, value]) => {
+                    actMap[Number(key)] = value || [];
+                });
+                setActivityHistoryMap(actMap);
+
+                // โหลด course แยกสำหรับ Profile History
+                const crsResponse = await fetchCompetencyDashboard('course');
+                const crsPayload = crsResponse?.data || crsResponse;
+                const crsMap = {};
+                Object.entries(crsPayload.activities || {}).forEach(([key, value]) => {
+                    crsMap[Number(key)] = value || [];
+                });
+                setCourseHistoryMap(crsMap);
 
                 setCompetencies(styledCompetencies);
                 setRequirements(payload.requirements || {});
-                setActivitiesByCompetency(activityMap);
                 setAvailableYears(years);
 
                 if (styledCompetencies.length) {
@@ -164,18 +191,7 @@ export default function CompetencyPage() {
             return { ...comp, name };
         }));
     }, [language, t]);
-
-    /*
-    // useEffect for Course History - Uncomment if API is ready
-    useEffect(() => {
-        if (!user) return;
-        setCourseHistoryLoading(true);
-        fetch('/api/v1/courses-history', {
-            credentials: 'include',
-        })
-        .then(res => {
-    }
-    */
+    
     const handleLogout = async () => {
         await logout();
         router.push('/login');
@@ -205,10 +221,10 @@ export default function CompetencyPage() {
     // Get Data Helper
     const getScoresForCurrentFilter = () => {
         if (filterMode === 'year') {
-            return getScoresByYear(selectedYears[0], activitiesByCompetency);
+            return getScoresByYear(selectedYears[0], radarChartByCompetency);
         }
         const { startYear, startMonth, endYear, endMonth } = dateRange;
-        return getScoresByDateRange(startYear, startMonth, endYear, endMonth, activitiesByCompetency);
+        return getScoresByDateRange(startYear, startMonth, endYear, endMonth, radarChartByCompetency);
     };
 
     // Chart Data Preparation
@@ -220,7 +236,7 @@ export default function CompetencyPage() {
 
         if (filterMode === 'year') {
             selectedYears.forEach((year, index) => {
-                const yearData = getScoresByYear(year, activitiesByCompetency);
+                const yearData = getScoresByYear(year, radarChartByCompetency);
                 const data = selectedCompetencies.map(id => yearData[id] || 0);
 
                 datasets.push({
@@ -239,7 +255,7 @@ export default function CompetencyPage() {
             });
         } else {
             const { startYear, startMonth, endYear, endMonth } = dateRange;
-            const periodData = getScoresByDateRange(startYear, startMonth, endYear, endMonth, activitiesByCompetency);
+            const periodData = getScoresByDateRange(startYear, startMonth, endYear, endMonth, radarChartByCompetency);
             const data = selectedCompetencies.map(id => periodData[id] || 0);
 
             // Create label
@@ -316,8 +332,8 @@ export default function CompetencyPage() {
         let growth = 0;
         if (filterMode === 'year' && selectedYears.length >= 2) {
             const sorted = [...selectedYears].sort().reverse();
-            const latest = getScoresByYear(sorted[0], activitiesByCompetency);
-            const prev = getScoresByYear(sorted[1], activitiesByCompetency);
+            const latest = getScoresByYear(sorted[0], radarChartByCompetency);
+            const prev = getScoresByYear(sorted[1], radarChartByCompetency);
             const divisor = selectedCompetencies.length || 1;
             const latestAvg = Object.values(latest).reduce((a, b) => a + b, 0) / divisor;
             const prevAvg = Object.values(prev).reduce((a, b) => a + b, 0) / divisor;
@@ -335,7 +351,7 @@ export default function CompetencyPage() {
 
     const scoresForFilters = useMemo(
         () => getScoresForCurrentFilter(),
-        [filterMode, selectedYears, dateRange, activitiesByCompetency]
+        [filterMode, selectedYears, dateRange, radarChartByCompetency]
     );
 
     if (dataLoading) {
@@ -400,7 +416,7 @@ export default function CompetencyPage() {
                         setActiveCompetency={setActiveCompetency}
                         setActiveDetailYear={setActiveDetailYear}
                         competencies={competencies}
-                        activitiesByCompetency={activitiesByCompetency}
+                        radarChartByCompetency={radarChartByCompetency}
                         filterMode={filterMode}
                         selectedYears={selectedYears}
                         dateRange={dateRange}
@@ -438,7 +454,10 @@ export default function CompetencyPage() {
                                 </h2>
                             </div>
                             <div className="activity-list">
-                                {Object.values(activitiesByCompetency).flat().slice(0, 5).map(act => (
+                                {Object.values(activityHistory).flat()
+                                .filter(act => act.type != 'course')
+                                .slice(0, 5)
+                                .map(act => (
                                     <div key={act.id} className="activity-item">
                                         <div className="activity-badge">{(act.type || 'A').charAt(0)}</div>
                                         <div className="activity-info">
@@ -451,34 +470,36 @@ export default function CompetencyPage() {
                                     </div>
                                 ))}
                             </div>
-                            <div className="course-history-list">
+                            <div className='course-history-card'>
                                 <div className="card-header" style={{ marginTop: '1.5rem' }}>
                                     <h2>
-                                        <Award size={20} className="section-icon" />
+                                        <BookOpenText size={20} className="section-icon" />
                                         {t('course_history')}
                                     </h2>
                                 </div>
-                                {courseHistoryLoading ? (
+                                <div className="course-history-list">
+                                    {Object.values(courseHistory).flat().length === 0 ? (
                                         <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>
-                                            {t('loading')}
+                                            {t('no_course_history')}
                                         </div>
-                                ): courseHistory.length === 0 ? (
-                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>
-                                        {t('no_course_history')}
-                                    </div>
-                                ) : (
-                                    courseHistory.map(course => (
-                                        <div key={course.id} className="activity-item">
-                                            <div className="activity-badge">{(course.code || 'C').charAt(0)}
-                                                <h4>{course.name}</h4>
-                                                <span>{course.semester} {course.year}</span>
+                                    ) : (
+                                        // ใช้ Set กรอง title ซ้ำออก
+                                        [...new Map(
+                                            Object.values(courseHistory).flat().map(c => [c.title, c])
+                                        ).values()].map(course => (
+                                            <div key={course.id} className="activity-item">
+                                                <div className="activity-badge">C</div>
+                                                <div className="activity-info">
+                                                    <h4>{course.title}</h4>
+                                                    <span>{course.year}</span>
+                                                </div>
+                                                <div className="activity-status verified">
+                                                    {t('verified')}
+                                                </div>
                                             </div>
-                                            <div className={`activity-status ${course.status === 'completed' ? 'verified' : 'pending'}`}>
-                                                {course.status === 'completed' ? t('completed') : t('pending')}
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
+                                        ))
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -506,7 +527,7 @@ export default function CompetencyPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Object.entries(activitiesByCompetency).flatMap(([compId, acts]) =>
+                                {Object.entries(radarChartByCompetency).flatMap(([compId, acts]) =>
                                     acts.map(act => {
                                         const comp = competencies.find(c => c.id === Number(compId));
                                         const Icon = comp?.icon;

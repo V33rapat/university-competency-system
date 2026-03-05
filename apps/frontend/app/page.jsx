@@ -554,9 +554,45 @@ export default function CompetencyPage() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Course Verify Table */}
+                    <div className="verify-list card" style={{ marginTop: '3rem' }}>
+                        <div className="card-header">
+                            <h2>
+                                <BookOpenText size={20} className="section-icon" />
+                                {t('courses')}
+                            </h2>
+                        </div>
+                        <table className="data-table">
+                            <thead>
+                                <tr>
+                                    <th>{t('courses')}</th>
+                                    <th>{t('year')}</th>
+                                    <th>{t('score')}</th>
+                                    <th>{t('verified')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.values(radarChartByCompetency).flat().map(course => (
+                                    <tr key={course.id}>
+                                        <td>{course.title}</td>
+                                        <td>{course.year}</td>
+                                        <td><strong>+{formatNumber(course.score, 2)}</strong></td>
+                                        <td>
+                                            <span className="status-badge verified">
+                                                ✓ {t('verified')}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
-
+            <div>
+                {console.log('Radar Chart Data:', { radarChartByCompetency })}
+            </div>
         </CompetencyLayout>
     );
 }
